@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Peggy Su — Design Manager</title>
+  <link rel="stylesheet" href="style.css?v=11" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@700;800;900&family=Caveat:wght@400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- Custom cursor -->
+  <div id="cursorDot"  aria-hidden="true"></div>
+  <div id="cursorRing" aria-hidden="true"></div>
+  <!-- Particle canvas -->
+  <canvas id="particleCanvas" aria-hidden="true"></canvas>
+  <!-- Film grain -->
+  <div class="grain-overlay" aria-hidden="true"></div>
+  <!-- Y2K overlays -->
+  <div class="scanlines" aria-hidden="true"></div>
+  <div class="crt-vignette" aria-hidden="true"></div>
+  <!-- Scroll progress -->
+  <div id="scrollProgress" aria-hidden="true"></div>
+
+  <!-- DECORATIVE STICKER LAYER -->
+  <div class="sticker-layer" aria-hidden="true">
+    <div class="sticker star s1">★</div>
+    <div class="sticker star s2">✦</div>
+    <div class="sticker star s3">★</div>
+    <div class="sticker star s4">✦</div>
+    <div class="sticker star s5">★</div>
+    <div class="sticker star s6">✦</div>
+    <div class="sticker star s7">★</div>
+    <div class="sticker star s8">★</div>
+    <div class="sticker star s9">✦</div>
+    <div class="sticker star s10">★</div>
+    <div class="sticker star s11">✦</div>
+    <div class="sticker clip c1"></div>
+    <div class="sticker clip c2"></div>
+    <div class="sticker tape t1"></div>
+    <div class="sticker tape t2"></div>
+    <!-- Adobe tool icon stickers -->
+    <div class="sticker tool-icon tool-ps">Ps</div>
+    <div class="sticker tool-icon tool-ai">Ai</div>
+    <div class="sticker tool-icon tool-ae">Ae</div>
+  </div>
+
+  <!-- NAV -->
+  <nav id="nav">
+    <div class="nav-logo">
+      <span class="nav-ref">REF: PS_DM</span>
+      <strong>Peggy Su</strong>
+    </div>
+    <span class="nav-date" aria-hidden="true">2026 · NO.01</span>
+    <ul class="nav-links">
+      <li><a href="#profile">Profile</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#works">Works</a></li>
+      <li><a href="#videos">Videos</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="nav-toggle" aria-label="toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- MOBILE MENU -->
+  <div class="mobile-menu" id="mobileMenu">
+    <ul>
+      <li><a href="#profile"    class="menu-link">Profile</a></li>
+      <li><a href="#experience" class="menu-link">Experience</a></li>
+      <li><a href="#works"      class="menu-link">Works</a></li>
+      <li><a href="#videos"     class="menu-link">Videos</a></li>
+      <li><a href="#contact"    class="menu-link">Contact</a></li>
+    </ul>
+  </div>
+
+  <!-- ======================================================
+       HERO / PROFILE
+  ====================================================== -->
+  <section id="profile">
+    <span class="sec-num" aria-hidden="true">01</span>
+    <div class="container profile-grid">
+
+      <!-- LEFT: Hero intro text -->
+      <div class="hero-text reveal">
+        <div class="hero-tag-row">
+          <span class="tab-sticker tab-pink">Design</span>
+          <span class="tab-sticker tab-yellow">Brand</span>
+          <span class="tab-sticker tab-blue">Strategy</span>
+        </div>
+        <h1 class="hero-title">
+          Hi, I'm<br />
+          <span class="name-clip"><span class="handwrite-big">Peggy Su</span></span>
+        </h1>
+        <p class="hero-sub">用視覺說故事，以數據驅動創意。</p>
+        <div class="hero-stats">
+          <div class="stat-pill">
+            <span class="stat-n">10+</span>
+            <span class="stat-l">Years</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-n">50+</span>
+            <span class="stat-l">Projects</span>
+          </div>
+          <div class="stat-pill">
+            <span class="stat-n">30+</span>
+            <span class="stat-l">Brands</span>
+          </div>
+        </div>
+        <div class="hero-cta">
+          <a href="#works"   class="btn btn-primary">Works</a>
+          <a href="#contact" class="btn btn-ghost">Contact</a>
+        </div>
+        <!-- Adobe tool badges -->
+        <div class="tool-badges">
+          <span class="tool-badge ps">Ps</span>
+          <span class="tool-badge ai">Ai</span>
+          <span class="tool-badge ae">Ae</span>
+          <span class="tool-badge fi">Fi</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: Archive card -->
+      <div class="archive-card reveal reveal-delay-1">
+
+        <div class="archive-header">
+          <span class="archive-ref">2026 PESU</span>
+          <span class="archive-num">ARCHIVE 012A</span>
+        </div>
+
+        <div class="archive-body">
+
+          <!-- Photo -->
+          <div class="archive-photo-wrap">
+            <img src="photo.jpg" alt="Peggy Su" class="archive-photo" />
+            <div class="photo-tape"></div>
+            <span class="photo-camera-icon" aria-hidden="true">📷</span>
+          </div>
+
+          <!-- Info + barcode -->
+          <div class="archive-info">
+            <div class="role-badge">DESIGN MANAGER</div>
+            <p class="archive-desc">
+              Design Manager with 8+ years of experience in brand and marketing design, specializing in building consistent visual identities across digital channels.
+            </p>
+            <p class="archive-desc">
+              Strong in defining creative strategies that align global brand direction with local market needs, supported by data-driven testing and iteration.
+            </p>
+            <p class="archive-desc">
+              Experienced in collaborating cross-functionally to optimize brand campaigns, improve user experience, and drive measurable business impact.
+            </p>
+
+            <!-- Barcode block -->
+            <div class="archive-barcode">
+              <span class="archive-date">10 · 04 · 017</span>
+              <svg class="barcode-svg" viewBox="0 0 220 36" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="0"   width="3"   height="36" fill="#1e1a17"/>
+                <rect x="5"   width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="8"   width="2.5" height="36" fill="#1e1a17"/>
+                <rect x="13"  width="1"   height="36" fill="#1e1a17"/>
+                <rect x="16"  width="3"   height="36" fill="#1e1a17"/>
+                <rect x="21"  width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="25"  width="2"   height="36" fill="#1e1a17"/>
+                <rect x="29"  width="1"   height="36" fill="#1e1a17"/>
+                <rect x="32"  width="3"   height="36" fill="#1e1a17"/>
+                <rect x="37"  width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="41"  width="1"   height="36" fill="#1e1a17"/>
+                <rect x="44"  width="2.5" height="36" fill="#1e1a17"/>
+                <rect x="49"  width="1"   height="36" fill="#1e1a17"/>
+                <rect x="52"  width="3"   height="36" fill="#1e1a17"/>
+                <rect x="57"  width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="61"  width="2"   height="36" fill="#1e1a17"/>
+                <rect x="65"  width="1"   height="36" fill="#1e1a17"/>
+                <rect x="68"  width="3"   height="36" fill="#1e1a17"/>
+                <rect x="73"  width="1"   height="36" fill="#1e1a17"/>
+                <rect x="76"  width="2.5" height="36" fill="#1e1a17"/>
+                <rect x="81"  width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="85"  width="1"   height="36" fill="#1e1a17"/>
+                <rect x="88"  width="3"   height="36" fill="#1e1a17"/>
+                <rect x="93"  width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="97"  width="2"   height="36" fill="#1e1a17"/>
+                <rect x="101" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="104" width="3"   height="36" fill="#1e1a17"/>
+                <rect x="109" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="112" width="2.5" height="36" fill="#1e1a17"/>
+                <rect x="117" width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="121" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="124" width="3"   height="36" fill="#1e1a17"/>
+                <rect x="129" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="132" width="2"   height="36" fill="#1e1a17"/>
+                <rect x="136" width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="140" width="3"   height="36" fill="#1e1a17"/>
+                <rect x="145" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="148" width="2.5" height="36" fill="#1e1a17"/>
+                <rect x="153" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="156" width="3"   height="36" fill="#1e1a17"/>
+                <rect x="161" width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="165" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="168" width="2"   height="36" fill="#1e1a17"/>
+                <rect x="172" width="3"   height="36" fill="#1e1a17"/>
+                <rect x="177" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="180" width="2.5" height="36" fill="#1e1a17"/>
+                <rect x="185" width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="189" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="192" width="3"   height="36" fill="#1e1a17"/>
+                <rect x="197" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="200" width="2"   height="36" fill="#1e1a17"/>
+                <rect x="204" width="1.5" height="36" fill="#1e1a17"/>
+                <rect x="208" width="3"   height="36" fill="#1e1a17"/>
+                <rect x="213" width="1"   height="36" fill="#1e1a17"/>
+                <rect x="216" width="3"   height="36" fill="#1e1a17"/>
+              </svg>
+              <span class="barcode-label">PS-DM-2024-012A</span>
+            </div>
+          </div>
+
+        </div><!-- /archive-body -->
+
+        <!-- Info table -->
+        <div class="archive-table">
+          <div class="table-row">
+            <span class="t-label">NAME:</span>
+            <span class="t-value">Peggy Su</span>
+            <span class="t-label">ROLE:</span>
+            <span class="t-value">Design Manager</span>
+          </div>
+          <div class="table-row">
+            <span class="t-label">SPECIALTY:</span>
+            <span class="t-value">Brand &amp; Marketing Visual Strategy</span>
+            <span class="t-label">INDUSTRY:</span>
+            <span class="t-value">Digital Products, Brand, Marketing</span>
+          </div>
+          <div class="table-row">
+            <span class="t-label">EXPERIENCE:</span>
+            <span class="t-value">10+ Years</span>
+            <span class="t-label">LAUDS:</span>
+            <span class="t-value">English</span>
+          </div>
+          <div class="table-row">
+            <span class="t-label">LOCATION:</span>
+            <span class="t-value">Taipei, Taiwan</span>
+            <span class="t-label">LANGUAGES:</span>
+            <span class="t-value">English, Mandarin</span>
+          </div>
+          <div class="table-row table-row-full">
+            <span class="t-label">FOCUS:</span>
+            <span class="t-value">Brand Consistency, Data-driven Design, Creative Strategy</span>
+          </div>
+        </div>
+
+        <div class="archive-footer">ARCHIVE 012A</div>
+
+      </div><!-- /archive-card -->
+
+    </div><!-- /profile-grid -->
+  </section>
+
+  <!-- MARQUEE STRIP -->
+  <div class="marquee-strip" aria-hidden="true">
+    <div class="marquee-track">
+      <span>Brand Identity</span><span class="m-sep">—</span>
+      <span>Visual Strategy</span><span class="m-sep">—</span>
+      <span>Marketing Design</span><span class="m-sep">—</span>
+      <span>Data-Driven Creative</span><span class="m-sep">—</span>
+      <span>Cross-Channel Campaigns</span><span class="m-sep">—</span>
+      <span>Design Manager</span><span class="m-sep">—</span>
+      <span>10+ Years Experience</span><span class="m-sep">—</span>
+      <span>30+ Brands</span><span class="m-sep">—</span>
+      <span>Taipei · Taiwan</span><span class="m-sep">—</span>
+      <span>Brand Identity</span><span class="m-sep">—</span>
+      <span>Visual Strategy</span><span class="m-sep">—</span>
+      <span>Marketing Design</span><span class="m-sep">—</span>
+      <span>Data-Driven Creative</span><span class="m-sep">—</span>
+      <span>Cross-Channel Campaigns</span><span class="m-sep">—</span>
+      <span>Design Manager</span><span class="m-sep">—</span>
+      <span>10+ Years Experience</span><span class="m-sep">—</span>
+      <span>30+ Brands</span><span class="m-sep">—</span>
+      <span>Taipei · Taiwan</span><span class="m-sep">—</span>
+    </div>
+  </div>
+
+  <hr class="section-divider" aria-hidden="true" />
+
+  <!-- ======================================================
+       WORK EXPERIENCE
+  ====================================================== -->
+  <section id="experience">
+    <span class="sec-num" aria-hidden="true">02</span>
+    <div class="container">
+      <h2 class="section-scrap-title reveal">
+        <span class="tape-strip">WORK EXPERIENCE</span>
+      </h2>
+
+      <div class="exp-list">
+
+        <!-- Meitu -->
+        <div class="exp-card reveal" data-color="pink">
+          <div class="card-corner-fold" aria-hidden="true"></div>
+          <div class="exp-card-top">
+            <div class="exp-card-left">
+              <div class="exp-company">Meitu Corp.</div>
+              <div class="exp-role">Design Manager</div>
+            </div>
+            <div class="exp-date">Oct 2022 — Present</div>
+          </div>
+          <ul class="exp-bullets">
+            <li>Led brand and marketing visual design across multiple digital channels, ensuring a high-quality and consistent brand image aligned with global guidelines while adapting to local market needs.</li>
+            <li>Defined and executed creative visual strategies that balanced global brand direction with local-led design solutions for key overseas and regional markets.</li>
+            <li>Designed, tested, and optimized visual assets through an experimentation-driven approach including A/B testing and rapid design iterations, to continuously enhance user engagement and campaign effectiveness.</li>
+            <li>Applied data-informed decision making to refine creative direction, resulting in <strong>over 30% increase in user engagement</strong> and <strong>25% growth in app downloads</strong> in key markets.</li>
+            <li>Established scalable design workflows and review standards to support high-frequency marketing campaigns while maintaining brand consistency and creative quality.</li>
+            <li>Mentored designers on brand thinking, visual execution, and data-aware iteration, strengthening overall team capability and ownership.</li>
+          </ul>
+          <div class="exp-sticker">★</div>
+        </div>
+
+        <!-- Jomo -->
+        <div class="exp-card reveal reveal-delay-1" data-color="yellow">
+          <div class="card-corner-fold" aria-hidden="true"></div>
+          <div class="exp-card-top">
+            <div class="exp-card-left">
+              <div class="exp-company">Jomo Corp.</div>
+              <div class="exp-role">Design Manager</div>
+            </div>
+            <div class="exp-date">May 2019 — Sep 2021 · Hangzhou</div>
+          </div>
+          <ul class="exp-bullets">
+            <li>Led brand and visual design for lingerie product lines, ensuring a cohesive brand identity across campaigns, e-commerce platforms, and marketing materials.</li>
+            <li>Defined and refreshed the brand's visual language to better resonate with younger target audiences, strengthening brand recognition and emotional connection.</li>
+            <li>Collaborated with marketing and merchandising teams to translate brand positioning into seasonal campaigns and product storytelling.</li>
+            <li>Improved the online shopping and brand experience by redesigning product pages, visual hierarchy, and content presentation, leading to a <strong>25% reduction in bounce rate</strong>.</li>
+            <li>Delivered trend-driven collections and campaign visuals contributing to a <strong>40% increase in sales</strong> within six months, validating the effectiveness of brand-led design decisions.</li>
+          </ul>
+          <div class="exp-sticker">✦</div>
+        </div>
+
+        <!-- Perfect Corp -->
+        <div class="exp-card reveal reveal-delay-2" data-color="blue">
+          <div class="card-corner-fold" aria-hidden="true"></div>
+          <div class="exp-card-top">
+            <div class="exp-card-left">
+              <div class="exp-company">Perfect Corp.</div>
+              <div class="exp-role">Senior Designer</div>
+            </div>
+            <div class="exp-date">May 2015 — May 2018</div>
+          </div>
+          <ul class="exp-bullets">
+            <li>Designed marketing and in-app visual content to support global brand campaigns, increasing user engagement and average session time by <strong>35%</strong> during international award initiatives.</li>
+            <li>Created innovative AR-based virtual try-on experiences that enhanced brand differentiation and user experience, contributing to a <strong>40% increase in app downloads</strong>.</li>
+            <li>Produced localized creative assets for different international markets, ensuring brand consistency while adapting visuals to regional preferences.</li>
+            <li>Collaborated with marketing and business team, as well as global beauty brand partners, to deliver co-branded visual content that strengthened brand credibility and visibility.</li>
+          </ul>
+          <div class="exp-sticker">★</div>
+        </div>
+
+        <!-- Rakuten + Niusnews -->
+        <div class="exp-row-mini">
+          <div class="exp-card exp-mini reveal" data-color="green">
+            <div class="card-corner-fold" aria-hidden="true"></div>
+            <div class="exp-card-top">
+              <div class="exp-card-left">
+                <div class="exp-company">Rakuten Taiwan</div>
+                <div class="exp-role">Designer</div>
+              </div>
+              <div class="exp-date">Oct 2014 — May 2015</div>
+            </div>
+            <ul class="exp-bullets">
+              <li>Designed marketing visuals and digital assets for a fashion-focused social commerce platform, supporting brand campaigns across app, web, and social channels.</li>
+              <li>Contributed to app and website redesign initiatives, collaborating with cross-functional teams to improve visual consistency and user experience.</li>
+            </ul>
+          </div>
+
+          <div class="exp-card exp-mini reveal reveal-delay-1" data-color="orange">
+            <div class="card-corner-fold" aria-hidden="true"></div>
+            <div class="exp-card-top">
+              <div class="exp-card-left">
+                <div class="exp-company">Niusnews</div>
+                <div class="exp-role">Art Designer</div>
+              </div>
+              <div class="exp-date">May 2013 — Oct 2014</div>
+            </div>
+            <ul class="exp-bullets">
+              <li>Developed branding and visual systems for a large-scale digital media platform, establishing consistent visual language across editorial and marketing content.</li>
+              <li>Created digital and print visuals for campaigns and editorial features, strengthening brand recognition and audience engagement.</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider" aria-hidden="true" />
+
+  <!-- ======================================================
+       PORTFOLIO / WORKS
+  ====================================================== -->
+  <section id="works">
+    <span class="sec-num" aria-hidden="true">03</span>
+    <div class="container">
+      <h2 class="section-scrap-title reveal">
+        <span class="tape-strip tape-pink">PORTFOLIO</span>
+      </h2>
+
+      <div class="filter-bar reveal">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="branding">Branding</button>
+        <button class="filter-btn" data-filter="illustration">Illustration</button>
+        <button class="filter-btn" data-filter="social">Social Post</button>
+        <button class="filter-btn filter-soon" data-filter="3d">3D <span class="soon-badge">Soon</span></button>
+        <button class="filter-btn filter-soon" data-filter="ai">AI <span class="soon-badge">Soon</span></button>
+        <button class="filter-btn filter-soon" data-filter="motion">Motion <span class="soon-badge">Soon</span></button>
+      </div>
+
+      <div class="works-grid" id="worksGrid">
+
+        <!-- BRANDING -->
+        <div class="work-card polaroid reveal" data-cat="branding"
+          data-title="Meitu"
+          data-desc="Bannern Design"
+          data-img="branding/200B7094-985C-4BAE-A260-8FDD49A127E8.PNG">
+          <div class="polaroid-img">
+            <img src="branding/200B7094-985C-4BAE-A260-8FDD49A127E8.PNG" alt="Meitu MZ Campaign" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag">Branding</span>
+            <p>Meitu</p>
+          </div>
+        </div>
+
+        <!-- ILLUSTRATION -->
+        <div class="work-card polaroid reveal reveal-delay-1" data-cat="illustration"
+          data-title="Mimiko — Queen of Dance"
+          data-desc="happy Mimi dancing。PESU © 2021"
+          data-img="illustration/dancemimi.jpg">
+          <div class="polaroid-img">
+            <img src="illustration/dancemimi.jpg" alt="Mimiko Queen of Dance" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-illustration">Illustration</span>
+            <p>Mimiko — Queen of Dance</p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal reveal-delay-2" data-cat="illustration"
+          data-title="Starry Night Girl"
+          data-desc="Fashion illustration"
+          data-img="illustration/cp_iphone%206plus_1169x2102_pe2.jpg">
+          <div class="polaroid-img">
+            <img src="illustration/cp_iphone%206plus_1169x2102_pe2.jpg" alt="Starry Night Girl" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-illustration">Illustration</span>
+            <p>Starry Night Girl</p>
+          </div>
+        </div>
+
+        <!-- SOCIAL POST -->
+        <div class="work-card polaroid reveal" data-cat="social"
+          data-title="Creator Spotlight — Cover"
+          data-desc="Meitu Creative Project"
+          data-img="social%20post/cover.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/cover.jpg" alt="Creator Spotlight Cover" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p>Creator Spotlight — Cover</p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal reveal-delay-1" data-cat="social"
+          data-title="Creator Spotlight — Banner"
+          data-desc="Social post。"
+          data-img="social%20post/l.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/l.jpg" alt="Creator Spotlight Banner" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p>Creator Spotlight — Banner</p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal reveal-delay-2" data-cat="social"
+          data-title="Q&A"
+          data-desc="Creator sharing"
+          data-img="social%20post/p1.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/p1.jpg" alt="Q&A Inspiration" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p>Q&amp;A #1</p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal" data-cat="social"
+          data-title="Q&A"
+          data-desc=""
+          data-img="social%20post/p2.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/p2.jpg" alt="Q&A Creative Habits" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p>Q&amp;</p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal reveal-delay-1" data-cat="social"
+          data-title=""
+          data-desc="「"
+          data-img="social%20post/p3.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/p3.jpg" alt="Q&A Memorable Work" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p></p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal reveal-delay-2" data-cat="social"
+          data-title=""
+          data-desc="「"
+          data-img="social%20post/p4.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/p4.jpg" alt="Q&A Digital vs Traditional" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p></p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal" data-cat="social"
+          data-title=""
+          data-desc=""
+          data-img="social%20post/p5.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/p5.jpg" alt="Q&A Tools" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p></p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal reveal-delay-1" data-cat="social"
+          data-title=""
+          data-desc=""
+          data-img="social%20post/p6.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/p6.jpg" alt="Q&A Creative Block" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p></p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal reveal-delay-2" data-cat="social"
+          data-title="Meitu Creative Project"
+          data-desc="「Calling all creative souls, Come and join us!」Meitu Creative Project"
+          data-img="social%20post/p8.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/p8.jpg" alt="Meitu Creative Project" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p>Meitu Creative Project</p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal" data-cat="social"
+          data-title=""
+          data-desc=""
+          data-img="social%20post/p10.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/p10.jpg" alt="Q&A Dream Collab" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p></p>
+          </div>
+        </div>
+
+        <div class="work-card polaroid reveal reveal-delay-1" data-cat="social"
+          data-title=""
+          data-desc=""
+          data-img="social%20post/p10-1.jpg">
+          <div class="polaroid-img">
+            <img src="social%20post/p10-1.jpg" alt="Q&A Music Focus" loading="lazy" />
+            <div class="polaroid-overlay">
+              <button class="work-open-btn" aria-label="Open">&#8599;</button>
+            </div>
+          </div>
+          <div class="polaroid-caption">
+            <span class="work-tag tag-social">Social Post</span>
+            <p></p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="no-results" id="noResults" style="display:none;">
+        <span class="no-results-icon">✦</span>
+        <p></p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="section-divider" aria-hidden="true" />
+
+  <!-- ======================================================
+       VIDEOS  — Circular Gallery
+  ====================================================== -->
+  <section id="videos">
+    <span class="sec-num" aria-hidden="true">04</span>
+    <div class="container">
+      <h2 class="section-scrap-title reveal">
+        <span class="tape-strip tape-yellow">MOTION WORKS</span>
+      </h2>
+      <!-- Circular Gallery mount point -->
+      <div id="circularGallery" class="cg-mount"></div>
+    </div>
+  </section>
+
+  <hr class="section-divider" aria-hidden="true" />
+
+  <!-- ======================================================
+       CONTACT
+  ====================================================== -->
+  <section id="contact">
+    <span class="sec-num" aria-hidden="true">05</span>
+    <div class="container">
+      <div class="contact-card reveal">
+        <div class="contact-sticker-row" aria-hidden="true">
+          <span class="big-star">★</span>
+          <span class="big-star small">✦</span>
+          <span class="big-star">★</span>
+        </div>
+        <div class="section-label-hand">Contact</div>
+        <h2 class="contact-title">Let's<br /><span class="handwrite-big">Create Together</span></h2>
+        <p class="contact-desc">Contact me</p>
+        <a href="mailto:hat11433@gmail.com" class="btn btn-primary">hat11433@gmail.com</a>
+        <div class="social-links">
+          <a href="#" class="social-link">Instagram</a>
+          <a href="#" class="social-link">Behance</a>
+          <a href="#" class="social-link">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-inner">
+      <span class="footer-logo">Peggy Su<span>.</span></span>
+      <p>&copy; 2026 — Design Manager, Taipei</p>
+    </div>
+  </footer>
+
+  <!-- IMAGE LIGHTBOX -->
+  <div class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightboxClose">&times;</button>
+    <div class="lightbox-content">
+      <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+      <div class="lightbox-info">
+        <span class="lightbox-cat" id="lightboxCat"></span>
+        <h3 id="lightboxTitle"></h3>
+        <p id="lightboxDesc"></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- VIDEO MODAL -->
+  <div class="video-modal" id="videoModal">
+    <button class="lightbox-close" id="videoModalClose">&times;</button>
+    <div class="video-modal-inner">
+      <video id="videoPlayer" controls playsinline preload="none"></video>
+    </div>
+  </div>
+
+  <script src="node_modules/gsap/dist/gsap.min.js"></script>
+  <script src="node_modules/gsap/dist/ScrollTrigger.min.js"></script>
+  <script src="main.js?v=6"></script>
+  <script type="module">
+    import { initCircularGallery } from './circular-gallery.bundle.js';
+    const mount = document.getElementById('circularGallery');
+    if (mount) initCircularGallery(mount);
+  </script>
+</body>
+</html>

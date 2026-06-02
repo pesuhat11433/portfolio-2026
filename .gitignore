@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Claude config
+.claude/
+
+# Local only
+*.log
