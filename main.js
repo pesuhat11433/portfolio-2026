@@ -201,21 +201,21 @@ document.querySelectorAll('.exp-company').forEach(el => {
 });
 
 document.querySelectorAll('.exp-role, .exp-date').forEach(el => {
-  gsap.from(el, {
-    opacity: 0, x: -16,
-    duration: 0.6, ease: 'power3.out',
-    scrollTrigger: { trigger: el, start: 'top 88%' }
-  });
+  gsap.fromTo(el,
+    { opacity: 0, x: -16 },
+    { opacity: 1, x: 0, duration: 0.6, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 88%' } }
+  );
 });
 
 document.querySelectorAll('.exp-card').forEach(card => {
   const bullets = card.querySelectorAll('.exp-bullets li');
   if (!bullets.length) return;
-  gsap.from(bullets, {
-    opacity: 0, x: -18,
-    stagger: 0.07, duration: 0.5, ease: 'power2.out',
-    scrollTrigger: { trigger: card, start: 'top 80%' }
-  });
+  gsap.fromTo(bullets,
+    { opacity: 0, x: -18 },
+    { opacity: 1, x: 0, stagger: 0.07, duration: 0.5, ease: 'power2.out',
+      scrollTrigger: { trigger: card, start: 'top 80%' } }
+  );
 });
 
 /* =========================================
@@ -248,14 +248,14 @@ document.querySelectorAll('.sec-num').forEach(el => {
     start: 'top 88%',
     once: true,
     onEnter() {
-      gsap.from(grid.querySelectorAll('.work-card'), {
-        opacity: 0,
-        y: 55,
-        scale: 0.93,
-        duration: 0.75,
-        stagger: { each: 0.09, from: 'start' },
-        ease: 'power3.out'
-      });
+      const cards = grid.querySelectorAll('.work-card');
+      /* Add .visible first so CSS opacity:1 is the natural target */
+      cards.forEach(c => c.classList.add('visible'));
+      gsap.fromTo(cards,
+        { opacity: 0, y: 55, scale: 0.93 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.75,
+          stagger: { each: 0.09, from: 'start' }, ease: 'power3.out' }
+      );
     }
   });
 })();

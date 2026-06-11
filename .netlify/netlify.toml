@@ -8,7 +8,7 @@ redirects = []
 
 [build]
 publish = "/Users/pe_mbp/Peggy/pe2026/PESU_WEB"
-publishOrigin = "default"
+publishOrigin = "config"
 
 [build.environment]
 
