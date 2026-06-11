@@ -1,511 +1,855 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>PUNCH — Photo Hole-Punch / ASCII Editor</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PUNCH ARCADE</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Press-Start-2P/1.0.0/PressStart2P-Regular.css" onerror="this.remove()">
 <style>
-  /* =========================================================
-     DUTCH DESIGN / DE STIJL
-     pure white · thick black rules · primary colour blocks
-     ========================================================= */
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
   :root{
-    --white:#ffffff; --off:#f4f3ef; --black:#111111;
-    --red:#e2231a; --blue:#0b48c2; --yellow:#f7c600;
-    --line:3px solid var(--black);
-    --font-display:'Archivo','Helvetica Neue','Arial',sans-serif;
-    --font-mono:'Space Mono',monospace;
+    --cab-blue-1:#7ea6f2;
+    --cab-blue-2:#3f64c9;
+    --cab-blue-3:#1c2f63;
+    --bezel:#0c0c14;
+    --screen-bg:#0a0c10;
+    --screen-glow:#9be8ff;
+    --marquee-bg:#eef3ff;
+    --panel:#d6d2c4;
+    --panel-dark:#b9b4a4;
+    --key:#f3f0e6;
+    --key-shadow:#9c988a;
+    --ink:#1a1a1a;
+    --yellow:#ffe14d;
+    --green:#4fbf4f;
+    --green-dark:#2d8a2d;
+    --red:#e6453c;
+    --red-dark:#a8281f;
+    --blue-btn:#3a6df0;
+    --blue-btn-dark:#1f3fa8;
+    --yellow-btn:#ffd23f;
+    --yellow-btn-dark:#c79c10;
   }
-  html{scroll-behavior:smooth}
+
+  *{ box-sizing:border-box; }
+
   body{
-    background:var(--white); color:var(--black);
-    font-family:var(--font-display); font-size:14px; line-height:1.4;
-    -webkit-font-smoothing:antialiased;
+    margin:0;
+    font-family:'VT323', monospace;
+    background:#11151c;
+    background-image:
+      radial-gradient(circle at 50% 0%, #2a3550 0%, #11151c 60%);
+    color:var(--ink);
+    display:flex;
+    justify-content:center;
+    padding:24px 12px 60px;
   }
-  a{color:inherit}
-  button,select,input{font-family:inherit}
 
-  /* ---------- header ---------- */
-  header{
-    border-bottom:6px solid var(--black);
-    display:flex; align-items:stretch; min-height:84px;
+  .cabinet{
+    width:100%;
+    max-width:520px;
+    background:linear-gradient(180deg, var(--cab-blue-1) 0%, var(--cab-blue-2) 55%, var(--cab-blue-3) 100%);
+    border-radius:18px;
+    padding:14px;
+    box-shadow:
+      0 0 0 4px #0c1330,
+      0 20px 60px rgba(0,0,0,0.55);
+    position:relative;
   }
-  .logo-block{
-    background:var(--black); color:var(--white);
-    display:flex;align-items:center;padding:0 26px; gap:14px;
-    border-right:6px solid var(--black);
-  }
-  .logo{font-family:var(--font-display);font-weight:900;font-size:40px;letter-spacing:-2px;line-height:1}
-  .destijl{display:flex;width:42px;height:42px;border:3px solid var(--white)}
-  .destijl i{display:block;flex:1;border-right:3px solid var(--white)}
-  .destijl i:last-child{border-right:none}
-  .destijl .r{background:var(--red)} .destijl .b{background:var(--blue)} .destijl .y{background:var(--yellow)}
-  .head-mid{flex:1;display:flex;align-items:center;padding:0 24px;
-    font-family:var(--font-mono);font-size:12px;letter-spacing:.5px;text-transform:uppercase}
-  .head-red{background:var(--red);color:var(--white);display:flex;align-items:center;padding:0 22px;
-    font-family:var(--font-mono);font-size:12px;border-left:6px solid var(--black)}
-  .head-red a{text-decoration:underline;font-weight:700}
 
-  /* ---------- layout ---------- */
-  .wrap{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 90px)}
-  @media(max-width:860px){.wrap{grid-template-columns:1fr}}
+  /* ---- Marquee ---- */
+  .marquee{
+    background:var(--marquee-bg);
+    border:4px solid var(--bezel);
+    border-radius:8px;
+    padding:14px 18px;
+    text-align:center;
+    margin-bottom:14px;
+    position:relative;
+    box-shadow: inset 0 0 0 2px #fff;
+  }
+  .marquee::before, .marquee::after,
+  .marquee .corner-tl, .marquee .corner-tr, .marquee .corner-bl, .marquee .corner-br{
+    content:"";
+    position:absolute;
+    width:10px; height:10px;
+    border:2px solid var(--bezel);
+    border-radius:50%;
+    background:#fff;
+  }
+  .marquee::before{ top:6px; left:6px; }
+  .marquee::after{ top:6px; right:6px; }
+  .marquee .corner-bl{ bottom:6px; left:6px; }
+  .marquee .corner-br{ bottom:6px; right:6px; }
 
-  /* ---------- control panel ---------- */
-  .panel{
-    border-right:6px solid var(--black); background:var(--white);
-    display:flex;flex-direction:column;
+  .marquee-title{
+    font-family:'Press Start 2P', monospace;
+    font-size:clamp(20px, 6vw, 32px);
+    letter-spacing:2px;
+    color:var(--ink);
+    margin:4px 0 10px;
   }
-  @media(max-width:860px){.panel{border-right:none;border-bottom:6px solid var(--black)}}
-  .group{padding:20px 22px;border-bottom:3px solid var(--black)}
-  .group:last-child{border-bottom:none}
-  .group-title{
-    font-family:var(--font-display);font-size:13px;font-weight:800;letter-spacing:.5px;
-    text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px;
+  .marquee-title span.punch{
+    background:var(--yellow);
+    padding:2px 10px;
+    border:3px solid var(--ink);
+    border-radius:4px;
+    box-shadow:3px 3px 0 var(--ink);
+    display:inline-block;
+    transform:rotate(-2deg);
   }
-  .group-title .no{
-    background:var(--black);color:var(--white);font-family:var(--font-mono);font-weight:700;
-    font-size:11px;width:22px;height:22px;display:grid;place-items:center;flex:none;
+  .marquee-sub{
+    background:#9be36b;
+    border:2px solid var(--ink);
+    border-radius:4px;
+    padding:6px 8px;
+    font-family:'Press Start 2P', monospace;
+    font-size:10px;
+    letter-spacing:1px;
+    margin-bottom:6px;
   }
-  .group-title span{margin-left:auto;color:var(--black);font-family:var(--font-mono);font-weight:400;font-size:11px;opacity:.55}
+  .marquee-sub2{
+    font-size:14px;
+    letter-spacing:1px;
+    color:#444;
+  }
 
-  /* upload */
-  .drop{
-    border:3px solid var(--black); padding:24px 16px; text-align:center;
-    cursor:pointer; transition:.12s; background:var(--white);
+  /* ---- Screen housing ---- */
+  .screen-housing{
+    background:#1b2540;
+    border:5px solid var(--bezel);
+    border-radius:10px;
+    padding:10px;
+    position:relative;
+    margin-bottom:14px;
   }
-  .drop:hover,.drop.drag{background:var(--yellow)}
-  .drop strong{display:block;font-family:var(--font-display);font-weight:900;font-size:18px;margin-bottom:4px;text-transform:uppercase;letter-spacing:-.5px}
-  .drop small{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:.5px}
+  .speaker{
+    position:absolute;
+    top:50%; transform:translateY(-50%);
+    width:34px; height:34px;
+    border-radius:50%;
+    background:
+      radial-gradient(circle, transparent 0 3px, var(--ink) 3px 4px, transparent 4px),
+      repeating-conic-gradient(var(--ink) 0deg 6deg, transparent 6deg 18deg);
+    opacity:0.55;
+  }
+  .speaker.left{ left:-20px; }
+  .speaker.right{ right:-20px; }
 
-  /* mode toggle */
-  .seg{display:flex;border:3px solid var(--black)}
-  .seg button{
-    flex:1;background:var(--white);padding:11px 4px;font-family:var(--font-display);
-    font-size:12px;font-weight:800;letter-spacing:.5px;border:none;border-right:3px solid var(--black);
-    text-transform:uppercase;transition:.1s;
+  .screen{
+    background:var(--screen-bg);
+    border-radius:6px;
+    aspect-ratio: 4/3.4;
+    width:100%;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.9), inset 0 0 4px var(--screen-glow);
   }
-  .seg button:last-child{border-right:none}
-  .seg button.on{background:var(--blue);color:var(--white)}
+  .screen canvas, .screen .ascii-out{
+    max-width:100%;
+    max-height:100%;
+    image-rendering:pixelated;
+  }
+  .screen .ascii-out{
+    font-family:'VT323', monospace;
+    white-space:pre;
+    color:var(--screen-glow);
+    font-size:5px;
+    line-height:5px;
+    text-align:center;
+    overflow:hidden;
+    text-shadow:0 0 4px var(--screen-glow);
+  }
+  .screen .placeholder{
+    font-family:'Press Start 2P', monospace;
+    color:var(--screen-glow);
+    font-size:12px;
+    text-align:center;
+    text-shadow:0 0 6px var(--screen-glow);
+    opacity:0.8;
+    line-height:2;
+    padding:20px;
+  }
+  .scanlines{
+    position:absolute; inset:0;
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0) 0px,
+      rgba(0,0,0,0) 2px,
+      rgba(0,0,0,0.18) 3px
+    );
+    pointer-events:none;
+    mix-blend-mode:multiply;
+  }
+  .crt-glow{
+    position:absolute; inset:0;
+    box-shadow: inset 0 0 60px 10px rgba(0,0,0,0.6);
+    pointer-events:none;
+  }
+
+  /* status banner under screen, like the yellow instruction box */
+  .status-bar{
+    background:var(--yellow);
+    border:3px solid var(--ink);
+    border-radius:6px;
+    padding:8px 10px;
+    text-align:center;
+    margin-bottom:14px;
+    font-size:16px;
+    box-shadow:3px 3px 0 rgba(0,0,0,0.25);
+  }
+  .status-bar .en{
+    font-family:'Press Start 2P', monospace;
+    font-size:9px;
+    margin-top:4px;
+  }
+
+  /* ---- Control deck ---- */
+  .deck{
+    background:var(--panel);
+    border:4px solid var(--bezel);
+    border-radius:10px;
+    padding:12px;
+  }
+  .deck-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+  }
+  .deck-label{
+    font-family:'Press Start 2P', monospace;
+    font-size:10px;
+    letter-spacing:1px;
+    color:#333;
+    background:var(--key);
+    border:2px solid var(--ink);
+    border-radius:4px;
+    padding:4px 8px;
+    box-shadow:2px 2px 0 var(--key-shadow);
+  }
+  .step-num{
+    display:inline-block;
+    background:var(--ink);
+    color:var(--yellow);
+    border-radius:50%;
+    width:18px; height:18px;
+    line-height:18px;
+    text-align:center;
+    font-size:9px;
+    margin-right:6px;
+  }
+
+  /* segmented buttons */
+  .seg-group{
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .seg-btn{
+    font-family:'Press Start 2P', monospace;
+    font-size:10px;
+    padding:8px 10px;
+    background:var(--key);
+    border:2px solid var(--ink);
+    border-radius:6px;
+    cursor:pointer;
+    box-shadow:2px 2px 0 var(--ink);
+    transition:transform 0.05s;
+    color:var(--ink);
+  }
+  .seg-btn:active{ transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
+  .seg-btn.active{
+    background:var(--green);
+    box-shadow:2px 2px 0 var(--green-dark);
+  }
+
+  /* drop zone styled as card slot */
+  .dropzone{
+    border:3px dashed var(--ink);
+    border-radius:8px;
+    background:#fff;
+    padding:16px;
+    text-align:center;
+    cursor:pointer;
+    margin-bottom:12px;
+    font-size:16px;
+    position:relative;
+  }
+  .dropzone.dragover{
+    background:#fff8d6;
+  }
+  .dropzone .slot-label{
+    font-family:'Press Start 2P', monospace;
+    font-size:9px;
+    color:#666;
+    margin-top:4px;
+  }
+  .dropzone input{ display:none; }
 
   /* sliders */
-  .ctrl{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
-  .ctrl:last-child{margin-bottom:0}
-  .ctrl label{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-  .ctrl label b{font-weight:700;background:var(--yellow);padding:0 6px}
-  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:3px;background:var(--black);outline:none}
-  input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none;appearance:none;width:18px;height:18px;background:var(--red);
-    border:3px solid var(--black);cursor:pointer;border-radius:0;
+  .slider-row{
+    margin-bottom:10px;
   }
-  input[type=range]::-moz-range-thumb{
-    width:18px;height:18px;background:var(--red);border:3px solid var(--black);cursor:pointer;border-radius:0;
+  .slider-row label{
+    display:flex;
+    justify-content:space-between;
+    font-size:16px;
+    margin-bottom:4px;
+  }
+  .slider-row .val{
+    font-family:'Press Start 2P', monospace;
+    font-size:10px;
+    background:var(--ink);
+    color:var(--yellow);
+    padding:2px 6px;
+    border-radius:4px;
+  }
+  input[type="range"]{
+    -webkit-appearance:none;
+    width:100%;
+    height:14px;
+    background:repeating-linear-gradient(
+      to right, var(--ink) 0 2px, transparent 2px 8px
+    ), var(--key);
+    border:2px solid var(--ink);
+    border-radius:8px;
+    box-shadow:inset 1px 1px 0 var(--key-shadow);
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:22px; height:22px;
+    background:var(--blue-btn);
+    border:2px solid var(--ink);
+    border-radius:50%;
+    box-shadow:2px 2px 0 var(--blue-btn-dark);
+    cursor:pointer;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:22px; height:22px;
+    background:var(--blue-btn);
+    border:2px solid var(--ink);
+    border-radius:50%;
+    box-shadow:2px 2px 0 var(--blue-btn-dark);
+    cursor:pointer;
   }
 
-  /* select + chips */
-  select{width:100%;padding:9px;border:3px solid var(--black);background:var(--white);
-    font-family:var(--font-mono);font-size:11px}
+  /* checkbox toggle styled as switch */
+  .toggle-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:16px;
+    margin-bottom:10px;
+  }
+  .toggle-row input{
+    width:20px; height:20px;
+    accent-color: var(--green);
+  }
 
-  /* color row */
-  .colors{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px}
-  .colorpick{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:10px;text-transform:uppercase}
-  .colorpick input{width:32px;height:32px;border:3px solid var(--black);padding:0;background:none;cursor:pointer}
-  .chips{display:flex;flex-wrap:wrap;gap:0;border:3px solid var(--black)}
-  .chip{
-    flex:1 0 33%;border:none;border-right:3px solid var(--black);border-top:3px solid var(--black);
-    background:var(--white);padding:9px 4px;
-    font-family:var(--font-mono);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  /* palette swatches */
+  .palette-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:6px;
+    margin-bottom:10px;
   }
-  .chip:nth-child(-n+3){border-top:none}
-  .chip.on{background:var(--black);color:var(--white)}
+  .swatch{
+    border:2px solid var(--ink);
+    border-radius:6px;
+    height:34px;
+    cursor:pointer;
+    box-shadow:2px 2px 0 var(--ink);
+    position:relative;
+  }
+  .swatch.active::after{
+    content:"✓";
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Press Start 2P', monospace;
+    font-size:12px;
+    color:#fff;
+    text-shadow:1px 1px 2px #000;
+  }
+  .swatch:active{ transform:translate(2px,2px); box-shadow:0 0 0 var(--ink); }
 
-  .switch-row{display:flex;align-items:center;justify-content:space-between;font-family:var(--font-mono);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
-  .switch{width:44px;height:24px;border:3px solid var(--black);background:var(--white);position:relative;cursor:pointer;flex:none}
-  .switch::after{content:"";position:absolute;top:1px;left:1px;width:16px;height:16px;background:var(--black);transition:.12s}
-  .switch.on{background:var(--red)}
-  .switch.on::after{left:21px;background:var(--white)}
+  /* arcade big buttons row (download etc) */
+  .big-buttons{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    margin-top:14px;
+  }
+  .arcade-btn{
+    width:72px; height:72px;
+    border-radius:50%;
+    border:3px solid var(--ink);
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    font-family:'Press Start 2P', monospace;
+    font-size:8px;
+    text-align:center;
+    cursor:pointer;
+    color:var(--ink);
+    box-shadow: 0 6px 0 rgba(0,0,0,0.35), 0 6px 8px rgba(0,0,0,0.3);
+    transition:transform 0.05s, box-shadow 0.05s;
+    line-height:1.3;
+  }
+  .arcade-btn:active{
+    transform:translateY(4px);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.35);
+  }
+  .arcade-btn.green{ background:radial-gradient(circle at 35% 30%, #9bf09b, var(--green)); }
+  .arcade-btn.red{ background:radial-gradient(circle at 35% 30%, #ff9b95, var(--red)); }
+  .arcade-btn.blue{ background:radial-gradient(circle at 35% 30%, #9bb4ff, var(--blue-btn)); color:#fff; }
+  .arcade-btn.yellow{ background:radial-gradient(circle at 35% 30%, #fff3a0, var(--yellow-btn)); }
 
-  /* buttons */
-  .btn{
-    width:100%;padding:14px;border:3px solid var(--black);background:var(--black);color:var(--white);
-    font-family:var(--font-display);font-weight:800;font-size:13px;letter-spacing:.5px;text-transform:uppercase;
-    transition:.1s;
+  /* footer note like the cabinet warning sticker */
+  .warning-note{
+    margin-top:14px;
+    background:#fff;
+    border:2px solid var(--ink);
+    border-radius:6px;
+    padding:8px 10px;
+    font-size:13px;
+    line-height:1.5;
   }
-  .btn:hover{background:var(--red);border-color:var(--black)}
-  .btn.ghost{background:var(--white);color:var(--black)}
-  .btn.ghost:hover{background:var(--yellow)}
-  .btn-row{display:flex;gap:0}
-  .btn-row .btn{border-right:none}
-  .btn-row .btn:last-child{border-right:3px solid var(--black);flex:0 0 80px}
+  .warning-note .title{
+    font-family:'Press Start 2P', monospace;
+    font-size:9px;
+    margin-bottom:4px;
+  }
 
-  /* ---------- stage ---------- */
-  .stage{
-    padding:40px; display:flex;align-items:center;justify-content:center;
-    background:var(--off); overflow:auto;position:relative;
+  /* pagination dots like the cabinet */
+  .dots-row{
+    display:flex;
+    justify-content:center;
+    gap:6px;
+    margin:12px 0 4px;
   }
-  #out{max-width:100%;max-height:78vh;border:6px solid var(--black);background:#fff}
-  #ascii{
-    font-family:var(--font-mono);white-space:pre;line-height:1;letter-spacing:0;
-    border:6px solid var(--black);overflow:auto;max-height:78vh;max-width:100%;display:none;
+  .dots-row .d{
+    width:10px; height:10px;
+    border-radius:50%;
+    background:#fff;
+    border:2px solid var(--ink);
   }
-  .empty{text-align:left;max-width:460px}
-  .empty .big{
-    font-family:var(--font-display);font-weight:900;font-size:80px;line-height:.86;
-    letter-spacing:-3px;text-transform:uppercase;margin-bottom:22px;
-  }
-  .empty .big em{font-style:normal;color:var(--red)}
-  .empty p{font-family:var(--font-mono);font-size:12px;line-height:1.7;max-width:360px}
-  .empty .blocks{display:flex;gap:0;margin-top:26px;border:3px solid var(--black);width:200px}
-  .empty .blocks i{display:block;height:34px;flex:1;border-right:3px solid var(--black)}
-  .empty .blocks i:last-child{border-right:none}
+  .dots-row .d.active{ background:var(--green); }
 
-  .badge{
-    position:absolute;top:0;right:0;font-family:var(--font-mono);font-size:11px;font-weight:700;
-    color:var(--white);background:var(--black);padding:8px 14px;letter-spacing:.5px;
+  .section-divider{
+    height:2px;
+    background:repeating-linear-gradient(to right, var(--ink) 0 6px, transparent 6px 12px);
+    margin:14px 0;
+    opacity:0.4;
   }
-  .hidden{display:none!important}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo-block">
-    <div class="logo">PUNCH</div>
-    <div class="destijl"><i class="r"></i><i class="y"></i><i class="b"></i></div>
+<div class="cabinet">
+
+  <!-- Marquee -->
+  <div class="marquee">
+    <div class="corner-tl"></div><div class="corner-bl"></div>
+    <div class="marquee-title"><span class="punch">PUNCH</span></div>
+    <div class="marquee-sub">PHOTO → HOLE-PUNCH / ASCII</div>
+    <div class="marquee-sub2">DE STIJL EDITION・CARD ISSUING SERVICE</div>
   </div>
-  <div class="head-mid">PHOTO → HOLE-PUNCH / ASCII · DE STIJL EDITION</div>
-  <div class="head-red">REF&nbsp;PE_PUNCH&nbsp;·&nbsp;<a href="index.html">← PORTFOLIO</a></div>
-</header>
 
-<div class="wrap">
+  <!-- Screen -->
+  <div class="screen-housing">
+    <div class="speaker left"></div>
+    <div class="speaker right"></div>
+    <div class="screen" id="screen">
+      <div class="placeholder" id="placeholder">請插入照片<br>INSERT PHOTO<br>TO BEGIN</div>
+      <canvas id="outCanvas" style="display:none;"></canvas>
+      <div class="ascii-out" id="asciiOut" style="display:none;"></div>
+      <div class="scanlines"></div>
+      <div class="crt-glow"></div>
+    </div>
+  </div>
 
-  <!-- ============ CONTROLS ============ -->
-  <aside class="panel">
+  <!-- status -->
+  <div class="status-bar">
+    請選擇模式並調整參數
+    <div class="en">PLEASE ADJUST THE SETTINGS BELOW</div>
+  </div>
 
-    <div class="group">
-      <div class="group-title"><span class="no">1</span>Source <span>jpg / png</span></div>
-      <div class="drop" id="drop">
-        <strong>Drop photo</strong>
-        <small>or click to browse</small>
-        <input type="file" id="file" accept="image/*" class="hidden" />
-      </div>
+  <!-- Control Deck -->
+  <div class="deck">
+
+    <div class="deck-row">
+      <span class="deck-label"><span class="step-num">1</span>SOURCE</span>
+    </div>
+    <div class="dropzone" id="dropzone">
+      📥 點擊或拖曳圖片至此<br>
+      <span class="slot-label">CARD SLOT — DROP JPG / PNG</span>
+      <input type="file" id="fileInput" accept="image/*">
     </div>
 
-    <div class="group">
-      <div class="group-title"><span class="no">2</span>Mode</div>
-      <div class="seg" id="modeSeg">
-        <button data-mode="holes" class="on">Holes</button>
-        <button data-mode="dots">Dots</button>
-        <button data-mode="ascii">ASCII</button>
-      </div>
+    <div class="section-divider"></div>
+
+    <div class="deck-row">
+      <span class="deck-label"><span class="step-num">2</span>MODE</span>
+    </div>
+    <div class="seg-group" id="modeGroup" style="margin-bottom:12px;">
+      <button class="seg-btn active" data-mode="holes">HOLES</button>
+      <button class="seg-btn" data-mode="dots">DOTS</button>
+      <button class="seg-btn" data-mode="ascii">ASCII</button>
     </div>
 
-    <div class="group">
-      <div class="group-title"><span class="no">3</span>Grid &amp; Tone</div>
-      <div class="ctrl">
-        <label>Resolution <b id="vRes">7</b></label>
-        <input type="range" id="res" min="3" max="22" value="7" />
-      </div>
-      <div class="ctrl">
-        <label>Contrast <b id="vCon">1.0</b></label>
-        <input type="range" id="con" min="0" max="200" value="100" />
-      </div>
-      <div class="ctrl">
-        <label>Brightness <b id="vBri">0</b></label>
-        <input type="range" id="bri" min="-100" max="100" value="0" />
-      </div>
-      <div class="ctrl" id="dotScaleWrap">
-        <label>Dot size <b id="vScale">1.0</b></label>
-        <input type="range" id="scale" min="20" max="160" value="100" />
-      </div>
-      <div class="switch-row">
-        <span>Invert / negative</span>
-        <div class="switch" id="invert"></div>
-      </div>
+    <div class="section-divider"></div>
+
+    <div class="deck-row">
+      <span class="deck-label"><span class="step-num">3</span>GRID & TONE</span>
     </div>
 
-    <!-- ASCII-only -->
-    <div class="group hidden" id="asciiGroup">
-      <div class="group-title"><span class="no">4</span>Character ramp</div>
-      <select id="ramp">
-        <option value=" .:-=+*#%@">Classic 10 · .:-=+*#%@</option>
-        <option value=" .,:;ox%#@">Soft · .,:;ox%#@</option>
-        <option value="@%#*+=-:. ">Reverse · @%#*=-:.</option>
-        <option value=" .'`^&quot;,:;Il!i&gt;&lt;~+_-?][}{1)(|\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&amp;8%B@$">Detailed 70</option>
-        <option value=" ░▒▓█">Blocks · ░▒▓█</option>
-        <option value=" .oO0">Bubbles · .oO0</option>
-        <option value=" ·•●">Punch dots · ·•●</option>
-        <option value=" /\\|_-+=">Tech · /\|_-+=</option>
-      </select>
-      <div class="switch-row" style="margin-top:14px">
-        <span>Colour from photo</span>
-        <div class="switch" id="asciiColor"></div>
-      </div>
+    <div class="slider-row">
+      <label>RESOLUTION <span class="val" id="resVal">7</span></label>
+      <input type="range" id="resSlider" min="2" max="20" value="7" step="1">
+    </div>
+    <div class="slider-row">
+      <label>CONTRAST <span class="val" id="conVal">1.0</span></label>
+      <input type="range" id="conSlider" min="0" max="200" value="100" step="5">
+    </div>
+    <div class="slider-row">
+      <label>BRIGHTNESS <span class="val" id="briVal">0</span></label>
+      <input type="range" id="briSlider" min="-100" max="100" value="0" step="5">
+    </div>
+    <div class="slider-row">
+      <label>DOT SIZE <span class="val" id="dotVal">1.0</span></label>
+      <input type="range" id="dotSlider" min="20" max="150" value="100" step="5">
+    </div>
+    <div class="toggle-row">
+      <input type="checkbox" id="invertCheck">
+      <label for="invertCheck">INVERT / NEGATIVE</label>
     </div>
 
-    <div class="group">
-      <div class="group-title"><span class="no">5</span>Palette</div>
-      <div class="colors">
-        <label class="colorpick">Ink <input type="color" id="cFg" value="#111111" /></label>
-        <label class="colorpick">Paper <input type="color" id="cBg" value="#ffffff" /></label>
-      </div>
-      <div class="chips" id="palettes">
-        <button class="chip on" data-fg="#111111" data-bg="#ffffff">Black</button>
-        <button class="chip" data-fg="#e2231a" data-bg="#ffffff">Red</button>
-        <button class="chip" data-fg="#0b48c2" data-bg="#ffffff">Blue</button>
-        <button class="chip" data-fg="#111111" data-bg="#f7c600">Yellow</button>
-        <button class="chip" data-fg="#ffffff" data-bg="#111111">Invert</button>
-        <button class="chip" data-fg="#e2231a" data-bg="#0b48c2">Stijl</button>
-      </div>
+    <div class="section-divider"></div>
+
+    <div class="deck-row">
+      <span class="deck-label"><span class="step-num">4</span>CHARACTER RAMP</span>
+    </div>
+    <div class="seg-group" id="rampGroup" style="margin-bottom:12px;">
+      <button class="seg-btn active" data-ramp=" .:-=+*#%@">CLASSIC</button>
+      <button class="seg-btn" data-ramp=" .,:;ox%#@">SOFT</button>
+      <button class="seg-btn" data-ramp="@%#*=-:. ">REVERSE</button>
+      <button class="seg-btn" data-ramp=" ░▒▓█">BLOCKS</button>
+      <button class="seg-btn" data-ramp=" .oO0">BUBBLES</button>
+      <button class="seg-btn" data-ramp=" ·•●">PUNCH DOTS</button>
     </div>
 
-    <div class="group">
-      <div class="btn-row">
-        <button class="btn" id="dl">Download PNG</button>
-        <button class="btn ghost" id="dlTxt">TXT</button>
-      </div>
+    <div class="section-divider"></div>
+
+    <div class="deck-row">
+      <span class="deck-label"><span class="step-num">5</span>PALETTE</span>
+    </div>
+    <div class="palette-grid">
+      <div class="swatch active" data-palette="photo" style="background:linear-gradient(135deg,#e63946,#457b9d,#f1c40f,#2a9d8f);" title="Colour from photo"></div>
+      <div class="swatch" data-palette="ink" style="background:#1a1a1a;" title="Ink"></div>
+      <div class="swatch" data-palette="paper" style="background:#f4f1ea;" title="Paper"></div>
+      <div class="swatch" data-palette="black" style="background:#000;" title="Black"></div>
+      <div class="swatch" data-palette="red" style="background:#e6453c;" title="Red"></div>
+      <div class="swatch" data-palette="blue" style="background:#3a6df0;" title="Blue"></div>
+      <div class="swatch" data-palette="yellow" style="background:#ffd23f;" title="Yellow"></div>
+      <div class="swatch" data-palette="stijl" style="background:linear-gradient(90deg,#e6453c 25%,#ffd23f 25% 50%,#3a6df0 50% 75%,#1a1a1a 75%);" title="Stijl"></div>
     </div>
 
-  </aside>
-
-  <!-- ============ STAGE ============ -->
-  <main class="stage" id="stage">
-    <span class="badge" id="badge"></span>
-    <div class="empty" id="empty">
-      <div class="big">DROP<br>A <em>PHOTO</em></div>
-      <p>Upload an image and it is punched into a grid of holes,
-      halftone dots, or ASCII characters. Adjust the dials, then export.</p>
-      <div class="blocks"><i style="background:#e2231a"></i><i style="background:#f7c600"></i><i style="background:#0b48c2"></i><i style="background:#111"></i></div>
+    <div class="big-buttons">
+      <div class="arcade-btn green" id="processBtn">RUN<br>PUNCH</div>
+      <div class="arcade-btn yellow" id="downloadPng">SAVE<br>PNG</div>
+      <div class="arcade-btn blue" id="downloadTxt">SAVE<br>TXT</div>
+      <div class="arcade-btn red" id="resetBtn">RESET</div>
     </div>
-    <canvas id="out" class="hidden"></canvas>
-    <pre id="ascii"></pre>
-  </main>
+
+    <div class="dots-row">
+      <div class="d active"></div><div class="d"></div><div class="d"></div><div class="d"></div><div class="d"></div>
+    </div>
+
+    <div class="warning-note">
+      <div class="title">※ 注意事項 ※</div>
+      1. 上傳照片後即時於螢幕預覽効果。<br>
+      2. RESOLUTION 數值越高，網點/字元越密集。<br>
+      3. ASCII 模式請使用 SAVE TXT 匯出文字檔。
+    </div>
+
+  </div>
 </div>
 
 <script>
-(() => {
-  const $ = id => document.getElementById(id);
-  const fileIn=$('file'), drop=$('drop'), stage=$('stage'),
-        canvas=$('out'), asciiEl=$('ascii'), empty=$('empty'), badge=$('badge'),
-        ctx=canvas.getContext('2d');
+(function(){
+  const fileInput = document.getElementById('fileInput');
+  const dropzone = document.getElementById('dropzone');
+  const screen = document.getElementById('screen');
+  const placeholder = document.getElementById('placeholder');
+  const outCanvas = document.getElementById('outCanvas');
+  const asciiOut = document.getElementById('asciiOut');
+  const ctx = outCanvas.getContext('2d');
 
-  const state = {
-    img:null, mode:'holes',
-    res:7, contrast:1, brightness:0, scale:1, invert:false,
-    fg:'#111111', bg:'#ffffff',
-    ramp:' .:-=+*#%@', asciiColor:false,
-    asciiText:''
-  };
+  let img = null;
+  let mode = 'holes';
+  let ramp = ' .:-=+*#%@';
+  let palette = 'photo';
 
-  /* ---------- upload ---------- */
-  drop.addEventListener('click', () => fileIn.click());
-  fileIn.addEventListener('change', e => loadFile(e.target.files[0]));
-  ;['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')}));
-  ;['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')}));
-  drop.addEventListener('drop', e => { if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]); });
-  stage.addEventListener('dragover',e=>e.preventDefault());
-  stage.addEventListener('drop',e=>{e.preventDefault(); if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);});
+  const resSlider = document.getElementById('resSlider');
+  const conSlider = document.getElementById('conSlider');
+  const briSlider = document.getElementById('briSlider');
+  const dotSlider = document.getElementById('dotSlider');
+  const invertCheck = document.getElementById('invertCheck');
 
-  function loadFile(f){
-    if(!f || !f.type.startsWith('image/')) return;
-    const img=new Image();
-    img.onload=()=>{ state.img=img; empty.classList.add('hidden'); render(); };
-    img.src=URL.createObjectURL(f);
+  const resVal = document.getElementById('resVal');
+  const conVal = document.getElementById('conVal');
+  const briVal = document.getElementById('briVal');
+  const dotVal = document.getElementById('dotVal');
+
+  function updateLabels(){
+    resVal.textContent = resSlider.value;
+    conVal.textContent = (conSlider.value/100).toFixed(1);
+    briVal.textContent = briSlider.value;
+    dotVal.textContent = (dotSlider.value/100).toFixed(1);
   }
+  updateLabels();
 
-  /* ---------- mode ---------- */
-  $('modeSeg').addEventListener('click', e=>{
-    const b=e.target.closest('button'); if(!b) return;
-    state.mode=b.dataset.mode;
-    [...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
-    $('asciiGroup').classList.toggle('hidden', state.mode!=='ascii');
-    $('dotScaleWrap').style.display = state.mode==='ascii' ? 'none' : '';
+  // Mode buttons
+  document.getElementById('modeGroup').addEventListener('click', e=>{
+    const btn = e.target.closest('.seg-btn');
+    if(!btn) return;
+    document.querySelectorAll('#modeGroup .seg-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mode = btn.dataset.mode;
     render();
   });
 
-  /* ---------- sliders ---------- */
-  const bind=(id,key,fmt,el)=>{
-    $(id).addEventListener('input',e=>{
-      let v=+e.target.value;
-      if(key==='contrast') v=v/100;
-      if(key==='scale') v=v/100;
-      state[key]=v;
-      $(el).textContent=fmt(v);
+  // Ramp buttons
+  document.getElementById('rampGroup').addEventListener('click', e=>{
+    const btn = e.target.closest('.seg-btn');
+    if(!btn) return;
+    document.querySelectorAll('#rampGroup .seg-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    ramp = btn.dataset.ramp;
+    render();
+  });
+
+  // Palette
+  document.querySelectorAll('.swatch').forEach(sw=>{
+    sw.addEventListener('click', ()=>{
+      document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('active'));
+      sw.classList.add('active');
+      palette = sw.dataset.palette;
       render();
     });
-  };
-  bind('res','res',v=>v,'vRes');
-  bind('con','contrast',v=>v.toFixed(2),'vCon');
-  bind('bri','brightness',v=>v,'vBri');
-  bind('scale','scale',v=>v.toFixed(2),'vScale');
-
-  $('invert').addEventListener('click',e=>{state.invert=!state.invert;e.currentTarget.classList.toggle('on');render();});
-  $('asciiColor').addEventListener('click',e=>{state.asciiColor=!state.asciiColor;e.currentTarget.classList.toggle('on');render();});
-  $('ramp').addEventListener('change',e=>{state.ramp=e.target.value;render();});
-
-  /* ---------- palette ---------- */
-  $('cFg').addEventListener('input',e=>{state.fg=e.target.value;syncChips();render();});
-  $('cBg').addEventListener('input',e=>{state.bg=e.target.value;syncChips();render();});
-  $('palettes').addEventListener('click',e=>{
-    const b=e.target.closest('.chip'); if(!b) return;
-    state.fg=b.dataset.fg; state.bg=b.dataset.bg;
-    $('cFg').value=state.fg; $('cBg').value=state.bg;
-    syncChips(); render();
   });
-  function syncChips(){
-    [...$('palettes').children].forEach(c=>
-      c.classList.toggle('on', c.dataset.fg.toLowerCase()===state.fg.toLowerCase()
-                            && c.dataset.bg.toLowerCase()===state.bg.toLowerCase()));
+
+  // sliders
+  [resSlider, conSlider, briSlider, dotSlider].forEach(s=>{
+    s.addEventListener('input', ()=>{ updateLabels(); render(); });
+  });
+  invertCheck.addEventListener('change', render);
+
+  // file handling
+  dropzone.addEventListener('click', ()=> fileInput.click());
+  fileInput.addEventListener('change', e=>{
+    if(e.target.files[0]) loadImage(e.target.files[0]);
+  });
+  ['dragover','dragenter'].forEach(ev=>{
+    dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.add('dragover'); });
+  });
+  ['dragleave','drop'].forEach(ev=>{
+    dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.remove('dragover'); });
+  });
+  dropzone.addEventListener('drop', e=>{
+    if(e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]);
+  });
+
+  function loadImage(file){
+    const reader = new FileReader();
+    reader.onload = ev=>{
+      const image = new Image();
+      image.onload = ()=>{
+        img = image;
+        placeholder.style.display = 'none';
+        render();
+      };
+      image.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
   }
 
-  /* ---------- sampling helper ---------- */
-  function sample(cellPx){
-    const img=state.img;
-    const maxW=900;
-    const ratio=Math.min(1, maxW/img.width);
-    const w=Math.max(1,Math.round(img.width*ratio));
-    const h=Math.max(1,Math.round(img.height*ratio));
-    const cols=Math.max(1,Math.floor(w/cellPx));
-    const rows=Math.max(1,Math.floor(h/cellPx));
-
-    const tmp=document.createElement('canvas');
-    tmp.width=cols; tmp.height=rows;
-    const tc=tmp.getContext('2d');
-    tc.drawImage(img,0,0,cols,rows);
-    const d=tc.getImageData(0,0,cols,rows).data;
-
-    const lum=new Float32Array(cols*rows), rgb=[];
-    for(let i=0;i<cols*rows;i++){
-      const r=d[i*4],g=d[i*4+1],b=d[i*4+2];
-      let l=(0.299*r+0.587*g+0.114*b)/255;
-      l=(l-0.5)*state.contrast+0.5 + state.brightness/100;
-      l=Math.min(1,Math.max(0,l));
-      if(state.invert) l=1-l;
-      lum[i]=l;
-      rgb.push([r,g,b]);
+  function getPaletteColor(brightness, srcColor){
+    // brightness 0-255
+    switch(palette){
+      case 'photo': return srcColor;
+      case 'ink': return [26,26,26];
+      case 'paper': return [244,241,234];
+      case 'black': return [0,0,0];
+      case 'red': return [230,69,60];
+      case 'blue': return [58,109,240];
+      case 'yellow': return [255,210,63];
+      case 'stijl': {
+        if(brightness < 64) return [26,26,26];
+        if(brightness < 128) return [230,69,60];
+        if(brightness < 192) return [58,109,240];
+        return [255,210,63];
+      }
+      default: return srcColor;
     }
-    return {cols,rows,lum,rgb};
   }
 
-  /* ---------- render dispatch ---------- */
+  function backgroundFor(){
+    return [10,12,16]; // screen bg
+  }
+
+  function processPixels(srcCanvas, srcCtx, w, h){
+    const contrast = conSlider.value/100;
+    const brightnessAdj = parseInt(briSlider.value,10);
+    const invert = invertCheck.checked;
+    const data = srcCtx.getImageData(0,0,w,h).data;
+
+    // returns function (x,y) => {brightness, color:[r,g,b]}
+    return function(x,y){
+      const i = (y*w + x) * 4;
+      let r = data[i], g = data[i+1], b = data[i+2];
+      // brightness adjust
+      r = r + brightnessAdj; g = g + brightnessAdj; b = b + brightnessAdj;
+      // contrast adjust
+      r = (r-128)*contrast + 128;
+      g = (g-128)*contrast + 128;
+      b = (b-128)*contrast + 128;
+      r = Math.min(255, Math.max(0, r));
+      g = Math.min(255, Math.max(0, g));
+      b = Math.min(255, Math.max(0, b));
+      let bright = (r*0.299 + g*0.587 + b*0.114);
+      if(invert) bright = 255 - bright;
+      return { brightness: bright, color:[r,g,b] };
+    };
+  }
+
   function render(){
-    if(!state.img) return;
-    badge.textContent = state.mode.toUpperCase()+' · '+state.img.width+'×'+state.img.height;
-    if(state.mode==='ascii'){ renderAscii(); }
-    else { renderDots(); }
-  }
+    if(!img) return;
 
-  /* ---------- dots / holes ---------- */
-  function renderDots(){
-    asciiEl.style.display='none';
-    canvas.classList.remove('hidden');
+    const cells = parseInt(resSlider.value,10) * 4; // grid cell count along width
+    const dotSizeFactor = dotSlider.value/100;
 
-    const cellPx = 26 - state.res;
-    const s=sample(cellPx);
-    const out=12;
-    canvas.width=s.cols*out;
-    canvas.height=s.rows*out;
+    // draw source image to a small offscreen canvas at "cells" resolution
+    const aspect = img.height/img.width;
+    const gridW = cells;
+    const gridH = Math.max(1, Math.round(cells*aspect));
 
-    ctx.fillStyle=state.bg;
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle=state.fg;
+    const small = document.createElement('canvas');
+    small.width = gridW; small.height = gridH;
+    const sctx = small.getContext('2d');
+    sctx.drawImage(img, 0, 0, gridW, gridH);
 
-    const rMax=out/2*state.scale;
-    for(let y=0;y<s.rows;y++){
-      for(let x=0;x<s.cols;x++){
-        const l=s.lum[y*s.cols+x];
-        const dark=1-l;
-        if(dark<=0.02) continue;
-        const cx=x*out+out/2, cy=y*out+out/2;
-        const r=rMax*Math.sqrt(dark);
+    const sample = processPixels(small, sctx, gridW, gridH);
 
-        if(state.mode==='holes'){
-          ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
-          const hole=r*0.42;
-          if(hole>0.6){
-            ctx.save(); ctx.globalCompositeOperation='destination-out';
-            ctx.beginPath(); ctx.arc(cx,cy,hole,0,Math.PI*2); ctx.fill();
-            ctx.restore();
+    if(mode === 'ascii'){
+      outCanvas.style.display = 'none';
+      asciiOut.style.display = 'block';
+
+      let str = '';
+      const chars = ramp;
+      for(let y=0;y<gridH;y++){
+        for(let x=0;x<gridW;x++){
+          const {brightness} = sample(x,y);
+          const idx = Math.min(chars.length-1, Math.floor((brightness/255) * (chars.length)));
+          str += chars[chars.length-1-idx] || chars[0];
+        }
+        str += '\n';
+      }
+      asciiOut.textContent = str;
+      // scale font so it roughly fills
+      const fontSize = Math.max(2, Math.min(10, 360/gridW));
+      asciiOut.style.fontSize = fontSize+'px';
+      asciiOut.style.lineHeight = fontSize+'px';
+      return;
+    }
+
+    asciiOut.style.display = 'none';
+    outCanvas.style.display = 'block';
+
+    // output canvas size
+    const outSize = 480;
+    outCanvas.width = outSize;
+    outCanvas.height = Math.round(outSize*aspect);
+    ctx.fillStyle = `rgb(${backgroundFor().join(',')})`;
+    ctx.fillRect(0,0,outCanvas.width, outCanvas.height);
+
+    const cellW = outCanvas.width/gridW;
+    const cellH = outCanvas.height/gridH;
+
+    for(let y=0;y<gridH;y++){
+      for(let x=0;x<gridW;x++){
+        const {brightness, color} = sample(x,y);
+        const t = brightness/255; // 0 dark -> 1 light
+        const cx = x*cellW + cellW/2;
+        const cy = y*cellH + cellH/2;
+
+        if(mode === 'holes'){
+          // darker = bigger hole (more "punched")
+          const maxR = Math.min(cellW,cellH)/2 * dotSizeFactor;
+          const r = maxR * (1-t);
+          // draw cell background as palette color (lighter)
+          const bg = getPaletteColor(brightness, color);
+          ctx.fillStyle = `rgb(${bg.map(v=>Math.min(255,v+40)|0).join(',')})`;
+          ctx.fillRect(x*cellW, y*cellH, cellW+1, cellH+1);
+          // punch hole (background color showing through)
+          ctx.fillStyle = `rgb(${backgroundFor().join(',')})`;
+          if(r > 0.3){
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI*2);
+            ctx.fill();
           }
-        } else {
-          ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+        } else if(mode === 'dots'){
+          // halftone: darker = bigger dot, dot color = palette
+          const maxR = Math.min(cellW,cellH)/2 * dotSizeFactor;
+          const r = maxR * (1-t);
+          const col = getPaletteColor(brightness, color);
+          ctx.fillStyle = `rgb(${col.join(',')})`;
+          if(r > 0.3){
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI*2);
+            ctx.fill();
+          }
         }
       }
     }
-    if(state.mode==='holes'){
-      ctx.save(); ctx.globalCompositeOperation='destination-over';
-      ctx.fillStyle=state.bg; ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.restore();
-    }
   }
 
-  /* ---------- ascii ---------- */
-  function renderAscii(){
-    canvas.classList.add('hidden');
-    asciiEl.style.display='block';
+  // Buttons
+  document.getElementById('processBtn').addEventListener('click', render);
 
-    const cellPx = 26 - state.res;
-    const s=sample(cellPx*0.6);
-    const ramp=state.ramp;
-    const n=ramp.length-1;
-
-    let html='', text='';
-    for(let y=0;y<s.rows;y++){
-      for(let x=0;x<s.cols;x++){
-        const l=s.lum[y*s.cols+x];
-        const ch=ramp[Math.round((1-l)*n)] ?? ' ';
-        text+=ch;
-        if(state.asciiColor){
-          const [r,g,b]=s.rgb[y*s.cols+x];
-          html+='<span style="color:rgb('+r+','+g+','+b+')">'+esc(ch)+'</span>';
-        } else html+=esc(ch);
-      }
-      text+='\n'; html+='\n';
-    }
-    state.asciiText=text;
-
-    const fs=Math.max(4,Math.min(11,Math.round(cellPx*0.7)));
-    asciiEl.style.fontSize=fs+'px';
-    asciiEl.style.padding=(fs)+'px';
-    asciiEl.style.background=state.bg;
-    asciiEl.style.color=state.fg;
-    asciiEl.innerHTML=html;
-  }
-  const esc=c=>c==='<'?'&lt;':c==='>'?'&gt;':c==='&'?'&amp;':c;
-
-  /* ---------- export ---------- */
-  $('dl').addEventListener('click',()=>{
-    if(!state.img) return;
-    let url;
-    if(state.mode==='ascii'){
-      url=asciiToCanvas().toDataURL('image/png');
-    } else url=canvas.toDataURL('image/png');
-    const a=document.createElement('a');
-    a.href=url; a.download='punch_'+state.mode+'.png'; a.click();
-  });
-  $('dlTxt').addEventListener('click',()=>{
-    if(state.mode!=='ascii'){ alert('Switch to ASCII mode to export text.'); return; }
-    const blob=new Blob([state.asciiText],{type:'text/plain'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob); a.download='punch_ascii.txt'; a.click();
+  document.getElementById('downloadPng').addEventListener('click', ()=>{
+    if(mode === 'ascii'){ alert('ASCII 模式請使用 SAVE TXT'); return; }
+    if(!img){ alert('請先插入照片 / Please insert a photo first'); return; }
+    const link = document.createElement('a');
+    link.download = 'punch-output.png';
+    link.href = outCanvas.toDataURL('image/png');
+    link.click();
   });
 
-  function asciiToCanvas(){
-    const lines=state.asciiText.replace(/\n$/,'').split('\n');
-    const fs=12, cw=fs*0.6, ch=fs;
-    const c=document.createElement('canvas');
-    c.width=Math.max(1,(lines[0]||'').length*cw);
-    c.height=lines.length*ch;
-    const x=c.getContext('2d');
-    x.fillStyle=state.bg; x.fillRect(0,0,c.width,c.height);
-    x.fillStyle=state.fg; x.font=fs+'px "Space Mono", monospace';
-    x.textBaseline='top';
-    lines.forEach((ln,i)=>x.fillText(ln,0,i*ch));
-    return c;
-  }
+  document.getElementById('downloadTxt').addEventListener('click', ()=>{
+    if(mode !== 'ascii'){ alert('請先切換到 ASCII 模式 / Switch to ASCII mode first'); return; }
+    if(!img){ alert('請先插入照片 / Please insert a photo first'); return; }
+    const blob = new Blob([asciiOut.textContent], {type:'text/plain'});
+    const link = document.createElement('a');
+    link.download = 'punch-output.txt';
+    link.href = URL.createObjectURL(blob);
+    link.click();
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
+    img = null;
+    outCanvas.style.display = 'none';
+    asciiOut.style.display = 'none';
+    placeholder.style.display = 'block';
+    fileInput.value = '';
+  });
+
 })();
 </script>
+
 </body>
 </html>
