@@ -1,0 +1,3365 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lifestyle Collage Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,600&family=Cormorant+Garamond:ital,wght@0,500;1,500&family=Archivo:wght@500;700;900&family=Space+Grotesk:wght@500;700&family=DM+Serif+Display:ital@0;1&family=Caveat:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f5f1;
+    --panel:#ffffff;
+    --ink:#1a1a1a;
+    --muted:#9b958d;
+    --accent:#1a1a1a;
+    --line:#e6e1d8;
+    --canvas-bg:#eceae6;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:"Archivo", "Noto Sans TC", sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:0 0 100px;
+  }
+  header{
+    width:100%;
+    max-width:1100px;
+    padding:48px 24px 56px;
+    border-bottom:1px solid var(--line);
+    margin-bottom:48px;
+  }
+  .header-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:28px;
+  }
+  .header-top span:last-child{
+    font-style:italic;
+    font-family:"Playfair Display", serif;
+    text-transform:none;
+    letter-spacing:0;
+    font-size:13px;
+  }
+  header h1{
+    font-family:"Playfair Display", serif;
+    font-size:clamp(40px, 8vw, 72px);
+    font-weight:700;
+    letter-spacing:-1px;
+    line-height:1.05;
+  }
+  header h1 em{
+    font-style:italic;
+    font-weight:500;
+  }
+  header p{
+    margin-top:14px;
+    color:var(--muted);
+    font-size:14px;
+    max-width:480px;
+    line-height:1.6;
+  }
+  header p em{
+    font-style:italic;
+    font-family:"Playfair Display", serif;
+  }
+
+  .layout{
+    display:flex;
+    flex-direction:column;
+    gap:32px;
+    width:100%;
+    max-width:1200px;
+    padding:0 24px;
+    align-items:flex-start;
+  }
+
+  .controls{
+    order:2;
+    width:100%;
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    gap:0;
+  }
+
+  .panel{
+    background:transparent;
+    border:none;
+    border-bottom:1px solid var(--line);
+    border-radius:0;
+    padding:20px 0;
+  }
+  .panel:first-child{ padding-top:0; }
+  .panel h2{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:2px;
+    color:var(--muted);
+    margin-bottom:0;
+    font-weight:600;
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    cursor:pointer;
+    user-select:none;
+    padding:4px 0;
+  }
+  .panel h2 .num{
+    font-family:"Playfair Display", serif;
+    font-style:italic;
+    font-size:15px;
+    color:var(--ink);
+    text-transform:none;
+    letter-spacing:0;
+  }
+  .panel h2 .chevron{
+    margin-left:auto;
+    font-size:14px;
+    font-family:"Playfair Display", serif;
+    transition:transform .2s;
+    color:var(--ink);
+  }
+  .panel.collapsed h2 .chevron{
+    transform:rotate(-90deg);
+  }
+  .panel-body{
+    margin-top:16px;
+    overflow:hidden;
+  }
+  .panel.collapsed .panel-body{
+    display:none;
+  }
+
+  .upload-zone{
+    border:1px solid var(--line);
+    border-radius:0;
+    padding:20px 12px;
+    text-align:center;
+    cursor:pointer;
+    transition:all .2s;
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--muted);
+    background:var(--panel);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    min-height:64px;
+  }
+  .upload-zone .plus{
+    font-family:"Playfair Display", serif;
+    font-size:20px;
+    font-style:italic;
+    line-height:1;
+  }
+  .upload-zone:hover{ border-color:var(--ink); color:var(--ink); }
+  .upload-zone input{ display:none; }
+
+  .thumbs{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:4px;
+    margin-top:12px;
+  }
+  .thumbs div{
+    position:relative;
+    aspect-ratio:1;
+    border-radius:0;
+    overflow:hidden;
+    background:#ddd;
+  }
+  .thumbs img{
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:grayscale(15%);
+  }
+  .thumbs .remove{
+    position:absolute; top:2px; right:2px;
+    background:rgba(26,26,26,.7);
+    color:#fff;
+    border:none;
+    border-radius:0;
+    width:16px; height:16px;
+    font-size:10px;
+    line-height:16px;
+    cursor:pointer;
+    padding:0;
+  }
+
+  .layout-options{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:8px;
+  }
+  .layout-btn{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:0;
+    border:none;
+    border-radius:0;
+    background:transparent;
+    cursor:pointer;
+    transition:all .15s;
+    aspect-ratio:1;
+  }
+  .layout-btn:hover .icon{ border-color:var(--ink); }
+  .layout-btn.active .icon{ border-color:var(--ink); border-width:2px; }
+  .layout-btn .icon{
+    width:100%; height:100%;
+    border-radius:0;
+    background:var(--canvas-bg);
+    flex-shrink:0;
+    position:relative;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .layout-btn .icon i{
+    position:absolute;
+    background:#c4beb3;
+    border-radius:0;
+  }
+  .layout-btn.active .icon i{ background:#1a1a1a; }
+
+  .bg-options{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .bg-swatch{
+    width:34px; height:34px;
+    border-radius:0;
+    border:1px solid var(--line);
+    cursor:pointer;
+    transition:transform .15s;
+  }
+  .bg-swatch:hover{ transform:translateY(-2px); }
+  .bg-swatch.active{ border-color:var(--ink); border-width:2px; }
+  .bg-image-swatch{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--canvas-bg);
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+  }
+  .bg-image-swatch .bg-image-icon{
+    font-family:"Playfair Display", serif;
+    font-style:italic;
+    font-size:18px;
+    color:var(--muted);
+    pointer-events:none;
+  }
+  .bg-image-swatch.has-image .bg-image-icon{
+    display:none;
+  }
+  .eyedropper-swatch{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--canvas-bg);
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+  }
+  .eyedropper-swatch .eyedropper-icon{
+    width:18px; height:18px;
+    color:var(--muted);
+    pointer-events:none;
+    display:flex;
+  }
+  .eyedropper-swatch .eyedropper-icon svg{
+    width:100%; height:100%;
+  }
+  .eyedropper-swatch.has-color .eyedropper-icon{
+    display:none;
+  }
+  .eyedropper-swatch input[type="color"]{
+    position:absolute;
+    top:0; left:0;
+    width:100%; height:100%;
+    opacity:0;
+    border:none;
+    padding:0;
+    cursor:pointer;
+  }
+
+  .color-options{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  #extractedColors:not(:empty){
+    margin-top:10px;
+  }
+  .color-swatch{
+    width:34px; height:34px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    cursor:pointer;
+    transition:transform .15s;
+    position:relative;
+  }
+  .color-swatch:hover{ transform:translateY(-2px); }
+  .color-swatch.active{ border-color:var(--ink); border-width:2px; box-shadow:0 0 0 2px var(--bg), 0 0 0 3px var(--ink); }
+  .color-swatch.auto{
+    background:linear-gradient(135deg, #fff 50%, #1a1a1a 50%);
+  }
+
+  .text-input-group{
+    display:flex; flex-direction:column; gap:10px;
+  }
+  .text-input-group label{
+    font-size:11px; color:var(--muted); letter-spacing:0.5px;
+  }
+  .text-input-group input, .text-input-group select, .text-input-group textarea{
+    padding:10px 0;
+    border:none;
+    border-bottom:1px solid var(--line);
+    border-radius:0;
+    font-size:14px;
+    font-family:inherit;
+    background:transparent;
+    color:var(--ink);
+  }
+  .text-input-group textarea{
+    resize:vertical;
+    line-height:1.5;
+  }
+  .text-input-group input:focus, .text-input-group select:focus, .text-input-group textarea:focus{
+    outline:none;
+    border-bottom-color:var(--ink);
+  }
+
+  .actions{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .panel.actions{
+    border-bottom:none;
+    padding-bottom:0;
+  }
+  .btn{
+    padding:14px;
+    border-radius:0;
+    border:1px solid var(--ink);
+    font-size:12px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .15s;
+  }
+  .btn:hover{ opacity:.85; }
+  .btn-primary{ background:var(--ink); color:#fff; }
+  .btn-secondary{ background:transparent; border:1px solid var(--ink); color:var(--ink); }
+  .btn-secondary:hover{ background:var(--ink); color:#fff; }
+
+  .canvas-wrap{
+    order:1;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+  }
+  #canvas{
+    width:100%;
+    max-width:560px;
+    aspect-ratio: 3/4;
+    background:var(--canvas-bg);
+    border-radius:0;
+    box-shadow:0 16px 50px rgba(0,0,0,.10);
+    position:relative;
+    overflow:hidden;
+    container-type: inline-size;
+  }
+  .cell{
+    position:absolute;
+    overflow:hidden;
+    border-radius:2px;
+    background:#d8d4ce;
+    cursor:pointer;
+  }
+  .cell img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .cell.empty::after{
+    content:'+';
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:24px;
+    color:#aaa;
+  }
+  .cell .label{
+    position:absolute;
+    color:#fff;
+    font-size:11px;
+    font-weight:500;
+  }
+  .cell .num{
+    position:absolute;
+    top:6px; left:8px;
+    color:#fff;
+    font-size:10px;
+    font-style:italic;
+    font-family:"Playfair Display", serif;
+  }
+  .canvas-title{
+    position:absolute;
+    pointer-events:none;
+  }
+
+  /* Circular cells (Bubble Scatter mode) */
+  .cell.circle{
+    border-radius:50%;
+  }
+
+  /* Per-cell caption labels */
+  .cell-caption{
+    position:absolute;
+    font-family:'Space Grotesk', sans-serif;
+    font-size:1.4cqw;
+    font-weight:400;
+    letter-spacing:0.3px;
+    line-height:1.3;
+    pointer-events:none;
+    white-space:nowrap;
+  }
+  .cell-caption.below{ text-align:left; }
+  .cell-caption.right{ text-align:left; }
+  .cell-caption.left{ text-align:right; }
+  .cell-caption.above{ text-align:left; }
+  .cell-caption.parens{ font-family:'Playfair Display',serif; font-style:italic; }
+
+  /* Letter mosaic mode */
+  .letter-bg-text{
+    position:absolute;
+    font-family:'Archivo', sans-serif;
+    font-weight:900;
+    font-size:14cqw;
+    line-height:0.95;
+    letter-spacing:-2px;
+    pointer-events:none;
+    z-index:1;
+    text-align:left;
+  }
+
+  /* Banner text mode (Art of Noticing style) */
+  .banner-words{
+    position:absolute;
+    z-index:5;
+    display:flex;
+    justify-content:space-between;
+    width:100%;
+    pointer-events:none;
+  }
+  .banner-words span{
+    font-family:'Archivo', sans-serif;
+    font-weight:700;
+    font-size:5.2cqw;
+    letter-spacing:-1px;
+    color:#f4e98a;
+  }
+
+  /* Scattered word mode */
+  .scatter-word{
+    position:absolute;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:400;
+    font-size:1.5cqw;
+    color:#fff;
+    pointer-events:none;
+    z-index:5;
+    line-height:1.2;
+  }
+
+  /* Justified paragraph mode */
+  .justified-para{
+    position:absolute;
+    font-family:'Space Grotesk', 'Archivo', sans-serif;
+    font-size:1.8cqw;
+    text-align:justify;
+    text-align-last:justify;
+    color:#a8423a;
+    line-height:1.55;
+    pointer-events:none;
+    word-spacing:0.15em;
+    font-weight:400;
+  }
+
+  /* Text wrap mode */
+  .wrap-text-container{
+    position:absolute;
+    font-family:'Cormorant Garamond','Georgia',serif;
+    font-size:2.5cqw;
+    line-height:1.35;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .wrap-photo{
+    background:#d8d4ce;
+    overflow:hidden;
+    position:relative;
+  }
+  .wrap-photo img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .wrap-text{
+    /* legacy class kept for export logic */
+    position:absolute;
+    font-family:'Cormorant Garamond','Georgia',serif;
+    font-size:2.2cqw;
+    line-height:1.35;
+    pointer-events:none;
+    z-index:1;
+    color:#1a1a1a;
+  }
+  .wrap-cell{
+    z-index:2;
+    box-shadow:0 0 0 4px var(--canvas-bg);
+  }
+
+  /* Fragment flow mode */
+  .fragment-text{
+    position:absolute;
+    font-family:'Archivo','Helvetica',sans-serif;
+    font-weight:700;
+    font-size:5cqw;
+    letter-spacing:-1px;
+    pointer-events:none;
+    line-height:1.1;
+  }
+  .fragment-text.thin{ font-weight:400; }
+
+  /* Split title mode */
+  .split-overlay-title{
+    position:absolute;
+    z-index:5;
+    pointer-events:none;
+    color:#fff;
+  }
+  .split-overlay-title .roman{
+    font-family:'Playfair Display', serif;
+    font-weight:700;
+    font-size:9cqw;
+    line-height:0.95;
+    letter-spacing:-2px;
+  }
+  .split-overlay-title .italic{
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:6.5cqw;
+    line-height:1;
+  }
+  .split-overlay-title .small{
+    font-family:'Archivo', sans-serif;
+    font-weight:500;
+    font-size:1.6cqw;
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+
+  .hint{
+    font-size:11px;
+    color:var(--muted);
+    text-align:center;
+    max-width:480px;
+    letter-spacing:0.5px;
+    font-style:italic;
+    font-family:"Playfair Display", serif;
+  }
+
+  /* ===== Mobile-first defaults: larger touch targets ===== */
+  .btn{
+    padding:16px;
+    border-radius:0;
+    border:1px solid var(--ink);
+    font-size:13px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    font-weight:600;
+    cursor:pointer;
+    transition:all .15s;
+    min-height:50px;
+  }
+
+  .bg-swatch{
+    width:40px; height:40px;
+  }
+
+  .upload-zone{
+    min-height:72px;
+    font-size:12px;
+  }
+
+  .text-input-group input, .text-input-group select, .text-input-group textarea{
+    padding:13px 0;
+    font-size:15px;
+  }
+
+  /* ===== Mobile: large preview near top, edge-to-edge ===== */
+  .canvas-wrap{
+    flex-direction:column;
+    align-items:stretch;
+    gap:12px;
+    /* full-bleed: cancel .layout's horizontal padding so canvas spans full width */
+    margin-left:-24px;
+    margin-right:-24px;
+    width:calc(100% + 48px);
+  }
+  .canvas-wrap #canvas{
+    width:100%;
+    height:auto;
+    max-width:none;
+    aspect-ratio:3/4;
+  }
+  .quick-actions{
+    display:flex;
+    flex-direction:row;
+    gap:8px;
+    padding:0 24px;
+    box-sizing:border-box;
+  }
+  .quick-actions .btn{
+    flex:1;
+    min-height:50px;
+    padding:0 8px;
+    font-size:12px;
+    letter-spacing:1px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:4px;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+  .quick-actions .btn-label{
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .canvas-wrap .hint{
+    padding:0 24px;
+    box-sizing:border-box;
+  }
+
+  /* ===== Desktop: horizontal split, controls left / preview right ===== */
+  @media (min-width:900px){
+    .layout{
+      flex-direction:row;
+      gap:56px;
+      align-items:flex-start;
+    }
+    .controls{
+      order:1;
+      flex:1 1 0;
+      max-width:480px;
+      width:auto;
+    }
+    .canvas-wrap{
+      order:2;
+      flex:1 1 0;
+      width:auto;
+      margin-left:0;
+      margin-right:0;
+      position:sticky;
+      top:24px;
+      left:auto; right:auto;
+      z-index:auto;
+      flex-direction:column;
+      align-items:center;
+      justify-content:flex-start;
+      gap:16px;
+      padding:0;
+      background:transparent;
+      border-bottom:none;
+      box-shadow:none;
+    }
+    .canvas-wrap #canvas{
+      width:100%;
+      height:auto;
+      max-width:520px;
+      box-shadow:0 16px 50px rgba(0,0,0,.10);
+    }
+    .quick-actions{
+      flex-direction:row;
+      width:100%;
+      max-width:520px;
+      gap:10px;
+      padding:0;
+    }
+    .quick-actions .btn{
+      min-height:auto;
+      padding:14px;
+      font-size:12px;
+      letter-spacing:1.5px;
+    }
+    .canvas-wrap .hint{
+      display:block;
+      padding:0;
+    }
+    /* restore tighter desktop control sizing */
+    .btn{
+      padding:14px;
+      font-size:12px;
+      min-height:auto;
+    }
+    .bg-swatch{
+      width:34px; height:34px;
+    }
+    .upload-zone{
+      min-height:auto;
+      padding:20px 12px;
+    }
+    .text-input-group input, .text-input-group select, .text-input-group textarea{
+      padding:10px 0;
+      font-size:14px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <span>LC — Tool — 2026 · Archive 01</span>
+    <span>Taipei, Taiwan</span>
+  </div>
+  <h1>lifestyle <em>collage</em></h1>
+  <p>upload your photos, let <em>composition</em> meet a little randomness — generate quiet, editorial layouts for your feed.</p>
+</header>
+
+<div class="layout">
+  <div class="controls">
+
+    <div class="panel">
+      <h2><span class="num">01</span> Upload Photos<span class="chevron">⌄</span></h2>
+      <div class="panel-body">
+      <label class="upload-zone">
+        <span class="plus">+</span>
+        <span>點擊或拖曳上傳照片<br>(可多選)</span>
+        <input type="file" id="fileInput" accept="image/*" multiple>
+      </label>
+      <div class="thumbs" id="thumbs"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="num">02</span> Layout Style<span class="chevron">⌄</span></h2>
+      <div class="panel-body">
+      <div class="layout-options" id="layoutOptions"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="num">03</span> Background<span class="chevron">⌄</span></h2>
+      <div class="panel-body">
+      <div class="bg-options" id="bgOptions"></div>
+      <button class="btn btn-secondary" id="extractColorBtn" style="margin-top:14px;">🎨 推薦顏色</button>
+      <div class="color-options" id="extractedColors"></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2><span class="num">04</span> Title Text<span class="chevron">⌄</span></h2>
+      <div class="panel-body">
+      <div class="text-input-group">
+        <label>主標題</label>
+        <input type="text" id="titleInput" placeholder="例如 lifestyle content / March dump">
+        <label>字體風格</label>
+        <select id="fontSelect">
+          <option value="playfair-bold">Playfair Display — 經典優雅粗體</option>
+          <option value="playfair-italic">Playfair Display — 斜體襯線</option>
+          <option value="cormorant">Cormorant Garamond — 細緻襯線</option>
+          <option value="dm-serif-italic">DM Serif — 雜誌斜體</option>
+          <option value="archivo">Archivo Black — 現代極簡</option>
+          <option value="space-grotesk">Space Grotesk — 幾何感</option>
+          <option value="caveat">Caveat — 手寫風</option>
+        </select>
+        <label>文字顏色</label>
+        <div class="color-options" id="colorOptions"></div>
+      </div>
+
+      <div class="text-input-group" style="margin-top:18px;">
+        <label>長文字段落（套用至 Justified Paragraph / Text Wrap）</label>
+        <textarea id="paragraphInput" rows="4" placeholder="輸入一段較長的文字..."></textarea>
+      </div>
+
+      <div class="text-input-group" style="margin-top:18px;">
+        <label>標籤文字（每行一個，套用至各版式的標籤、說明文字）</label>
+        <textarea id="labelsInput" rows="6" placeholder="每行輸入一個標籤..."></textarea>
+      </div>
+
+      <div class="text-input-group" style="margin-top:18px;">
+        <label>輸入想要的氛圍 (可留空 = 隨機，套用至主標題)</label>
+        <input type="text" id="moodInput" placeholder="例如：療癒 / 質感生活 / 旅行 / 工作日常">
+      </div>
+      <button class="btn btn-secondary" id="generateCaptionBtn" style="margin-top:14px;">✨ 生成文案</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="canvas-wrap">
+    <div id="canvas"></div>
+    <div class="quick-actions">
+      <button class="btn btn-secondary" id="randomizeBtn">🎲 <span class="btn-label">隨機微調</span></button>
+      <button class="btn btn-primary" id="exportBtn">⬇ <span class="btn-label">匯出 PNG</span></button>
+    </div>
+    <div class="hint">點擊任一格子可替換成不同的已上傳照片 — 「隨機微調」會在目前版型內重新分配照片位置與比例</div>
+  </div>
+</div>
+
+<script>
+const captionLibrary = {
+  療癒: [
+    "slow days are still days",
+    "soft hours, soft thoughts",
+    "rest is productive too",
+    "quiet by design",
+    "take it slow today",
+    "golden afternoon light"
+  ],
+  質感生活: [
+    "details make the difference",
+    "curated, not perfect",
+    "less but better",
+    "an ordinary kind of beautiful",
+    "everyday, elevated",
+    "small things, well chosen"
+  ],
+  旅行: [
+    "somewhere, anywhere",
+    "collect moments, not things",
+    "wander often",
+    "city diaries",
+    "notes from the road",
+    "off the usual path"
+  ],
+  工作日常: [
+    "behind the scenes",
+    "small wins count",
+    "process over perfection",
+    "another day, another draft",
+    "work in progress",
+    "the in-between hours"
+  ],
+  美食: [
+    "good food, good mood",
+    "table for one",
+    "flavors worth remembering",
+    "comfort on a plate",
+    "fed and happy",
+    "small bites, big joy"
+  ],
+  時尚: [
+    "today's uniform",
+    "details in motion",
+    "what i wore today",
+    "style notes",
+    "outfit of the day",
+    "dressed for the mood"
+  ],
+  生活紀錄: [
+    "lifestyle content (shot list)",
+    "March dump",
+    "weekly highlights",
+    "snapshots of now",
+    "just a normal week",
+    "life lately"
+  ],
+  夜晚: [
+    "golden hour thoughts",
+    "night routine",
+    "city lights, quiet mind",
+    "unwind",
+    "late night notes",
+    "winding down"
+  ]
+};
+
+const moodKeywords = {
+  療癒: ['療癒','放鬆','calm','relax','慢活','soft','靜'],
+  質感生活: ['質感','風格','美學','aesthetic','minimal','簡約'],
+  旅行: ['旅行','旅遊','travel','trip','出走','outdoor'],
+  工作日常: ['工作','職場','work','日常','busy','忙'],
+  美食: ['美食','食物','food','吃','咖啡','cafe'],
+  時尚: ['時尚','穿搭','fashion','outfit','style'],
+  生活紀錄: ['生活','紀錄','dump','回顧','week'],
+  夜晚: ['夜晚','晚上','night','夜','evening']
+};
+
+const labelLibrary = {
+  療癒: ['slow morning','tea time','soft light','do nothing day','gentle pace','quiet corner','breathing room','small comforts'],
+  質感生活: ['curated corner','texture study','still life','design detail','everyday object','quiet luxury','material world','form & function'],
+  旅行: ['new streets','local market','window seat','first impressions','wrong turn','street food','checked in','wandering'],
+  工作日常: ['desk setup','coffee refill','meeting notes','task list','focus mode','small wins','end of day','work in progress'],
+  美食: ['first bite','table setting','kitchen test','flavor notes','daily special','shared plate','dessert first','recipe trial'],
+  時尚: ["today's look",'closet edit','new pair','layering up','color study','fit check','accessory game','seasonal swap'],
+  生活紀錄: ['weekly recap','random moments','this week','life update','daily log','snapshot','field notes','ordinary day'],
+  夜晚: ['late lights','night walk','wind down','city glow','after hours','midnight snack','quiet streets','last call']
+};
+
+function generateCaption(moodInput){
+  let pool = [];
+  const trimmed = (moodInput || '').trim();
+
+  if(!trimmed){
+    // fully random across all
+    Object.values(captionLibrary).forEach(arr => pool.push(...arr));
+  } else {
+    let matched = false;
+    for(const [key, keywords] of Object.entries(moodKeywords)){
+      if(keywords.some(kw => trimmed.includes(kw)) || trimmed.includes(key)){
+        pool.push(...captionLibrary[key]);
+        matched = true;
+      }
+    }
+    if(!matched){
+      // fallback: combine input as part of caption with a template
+      const templates = [
+        `${trimmed} diaries`,
+        `${trimmed} (shot list)`,
+        `today's ${trimmed}`,
+        `notes on ${trimmed}`,
+        `a little bit of ${trimmed}`,
+        `${trimmed} dump`
+      ];
+      pool = templates;
+    }
+  }
+
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+// Generate a fresh set of label/tag lines matching the chosen mood
+function generateLabels(moodInput){
+  let pool = [];
+  const trimmed = (moodInput || '').trim();
+
+  if(!trimmed){
+    Object.values(labelLibrary).forEach(arr => pool.push(...arr));
+  } else {
+    let matched = false;
+    for(const [key, keywords] of Object.entries(moodKeywords)){
+      if(keywords.some(kw => trimmed.includes(kw)) || trimmed.includes(key)){
+        pool.push(...labelLibrary[key]);
+        matched = true;
+      }
+    }
+    if(!matched){
+      pool = cellCaptionPool.slice();
+    }
+  }
+
+  const shuffled = shuffle(pool);
+  const count = Math.min(6, shuffled.length);
+  return shuffled.slice(0, count);
+}
+
+document.getElementById('generateCaptionBtn').addEventListener('click', () => {
+  const mood = document.getElementById('moodInput').value;
+  document.getElementById('titleInput').value = generateCaption(mood);
+  document.getElementById('labelsInput').value = generateLabels(mood).join('\n');
+  render();
+});
+
+
+const metaLabelPool = [
+  'NO. 01 / SERIES',
+  'REF — 2026',
+  'COLLAGE / ARCHIVE',
+  '01 — 06',
+  'SHOT ON FILM',
+  'PRINTED IN TAIPEI',
+  'EDITION 01',
+  'FIG. A',
+  'INDEX / 03',
+  'TYPE — DISPLAY',
+  '— SELECTED WORKS',
+  'VOL. 01'
+];
+
+let activeMetaLabels = []; // indices into layout.metaLabels currently shown
+let metaLabelOrder = []; // metaLabel position idx -> index into getLabelLines(), persists until layout change / randomize
+let cellCaptionOrder = []; // cellIdx -> index into getLabelLines(), persists until layout change / randomize
+
+const cellCaptionPool = [
+  'cafe hopping','uno nights','outdoor eats','selfie','just her',
+  'sneaker check','refuel mode','golden hour','quiet times','warm light',
+  'on repeat','little joys','soft moments','today\'s find','random pick'
+];
+
+const narrativeTextPool = [
+  "What idea it had been that had sent me so audaciously trespassing I could not now remember. The spirit of peace descended like a cloud from heaven, for if the spirit of peace dwells anywhere, it is in the courts and quadrangles of Oxbridgeon a fine October morning.",
+  "A knock on the door. An old man answers looking tired and I say this is my house and he says something to me in a tongue I don't understand. I say it again, insistent, and he looks a bit more impatient and says something just like the first time only colder so I pause.",
+  "Some days arrive softly. The light slips through curtains, settles on the table, and stays for a while. You realize you have been holding your breath without meaning to, and now you can finally let it go."
+];
+
+// ===== Unified text content =====
+// All layouts derive their text from these three shared sources so that
+// switching layouts shows consistent content, and everything is editable
+// from the single "04 Title Text" panel.
+const DEFAULT_TITLE = 'lifestyle content';
+const DEFAULT_PARAGRAPH = narrativeTextPool[2];
+const DEFAULT_LABELS = cellCaptionPool;
+
+function getTitleText(){
+  const v = document.getElementById('titleInput').value.trim();
+  return v || DEFAULT_TITLE;
+}
+
+function getParagraphText(){
+  const v = document.getElementById('paragraphInput').value.trim();
+  return v || DEFAULT_PARAGRAPH;
+}
+
+function getLabelLines(){
+  const raw = document.getElementById('labelsInput').value;
+  const lines = raw.split('\n').map(l=>l.trim()).filter(l=>l.length>0);
+  return lines.length > 0 ? lines : DEFAULT_LABELS;
+}
+
+// Cycle/repeat a word list until it reaches at least `count` items
+function cycleWords(words, count){
+  if(words.length === 0) return [];
+  const out = [];
+  for(let i=0;i<count;i++) out.push(words[i % words.length]);
+  return out;
+}
+
+// Live per-cell caption text for caption-cells layouts, derived from the
+// shared label pool + a persisted shuffle order (so edits to labelsInput
+// apply immediately, while randomize can still reshuffle which label goes where)
+function getCellCaptionText(idx, layout){
+  const labels = getLabelLines();
+  if(layout.numberCaptions) return `(${String(idx+1).padStart(2,'0')})`;
+  const order = (cellCaptionOrder[idx] !== undefined) ? cellCaptionOrder[idx] : idx;
+  const txt = labels[order % labels.length];
+  return layout.parensCaption ? `( · ${txt})` : txt;
+}
+
+// Live meta-label text (small corner captions), derived from the shared
+// label pool + a persisted shuffle order, same live-update behavior as above
+function getMetaLabelText(posIdx){
+  const labels = getLabelLines();
+  const order = (metaLabelOrder[posIdx] !== undefined) ? metaLabelOrder[posIdx] : posIdx;
+  return labels[order % labels.length];
+}
+
+const layouts = [
+  {
+    id: 'shotlist',
+    name: 'Shot List',
+    cells: [
+      {x:0.10,y:0.06,w:0.18,h:0.13},
+      {x:0.30,y:0.06,w:0.18,h:0.13},
+      {x:0.74,y:0.16,w:0.20,h:0.13},
+      {x:0.06,y:0.56,w:0.24,h:0.20},
+      {x:0.74,y:0.56,w:0.20,h:0.10},
+      {x:0.60,y:0.70,w:0.16,h:0.16}
+    ],
+    titleAreas: [
+      {x:0.08,y:0.30,w:0.84,h:0.20, align:'left', size:'large', overlay:false},
+      {x:0.08,y:0.31,w:0.58,h:0.18, align:'left', size:'large', overlay:false, rotate:-2},
+      {x:0.04,y:0.44,w:0.50,h:0.10, align:'left', size:'medium', overlay:false},
+      {x:0.32,y:0.88,w:0.46,h:0.06, align:'left', size:'small', overlay:false}
+    ],
+    metaLabels: [
+      {x:0.50,y:0.02,w:0.22,h:0.04, align:'left'},
+      {x:0.04,y:0.95,w:0.40,h:0.04, align:'left'},
+      {x:0.78,y:0.95,w:0.18,h:0.04, align:'right'}
+    ]
+  },
+  {
+    id: 'wednesday',
+    name: 'Side Stack',
+    cells: [
+      {x:0.62,y:0.06,w:0.30,h:0.16},
+      {x:0.62,y:0.24,w:0.30,h:0.16},
+      {x:0.66,y:0.42,w:0.26,h:0.14}
+    ],
+    titleAreas: [
+      {x:0.08,y:0.16,w:0.46,h:0.24, align:'left', size:'large', overlay:false},
+      {x:0.08,y:0.16,w:0.46,h:0.24, align:'left', size:'large', overlay:false, rotate:-3},
+      {x:0.08,y:0.58,w:0.40,h:0.10, align:'left', size:'medium', overlay:false},
+      {x:0.08,y:0.06,w:0.40,h:0.06, align:'left', size:'small', overlay:false}
+    ],
+    metaLabels: [
+      {x:0.08,y:0.50,w:0.40,h:0.04, align:'left'},
+      {x:0.08,y:0.95,w:0.50,h:0.04, align:'left'},
+      {x:0.62,y:0.95,w:0.30,h:0.04, align:'right'}
+    ]
+  },
+  {
+    id: 'grid3',
+    name: 'Grid 3x2',
+    cells: [
+      {x:0.04,y:0.04,w:0.30,h:0.30},
+      {x:0.36,y:0.04,w:0.30,h:0.30},
+      {x:0.68,y:0.04,w:0.28,h:0.30},
+      {x:0.04,y:0.36,w:0.30,h:0.30},
+      {x:0.36,y:0.36,w:0.30,h:0.30},
+      {x:0.68,y:0.36,w:0.28,h:0.30}
+    ],
+    titleAreas: [
+      {x:0.10,y:0.70,w:0.80,h:0.20, align:'center', size:'large', overlay:false},
+      {x:0.10,y:0.70,w:0.80,h:0.20, align:'center', size:'large', overlay:false, rotate:-2},
+      {x:0.06,y:0.69,w:0.50,h:0.10, align:'left', size:'medium', overlay:false},
+      {x:0.06,y:0.69,w:0.88,h:0.06, align:'left', size:'small', overlay:false}
+    ],
+    metaLabels: [
+      {x:0.06,y:0.00,w:0.40,h:0.03, align:'left'},
+      {x:0.06,y:0.95,w:0.40,h:0.04, align:'left'},
+      {x:0.60,y:0.95,w:0.34,h:0.04, align:'right'}
+    ]
+  },
+  {
+    id: 'scatter',
+    name: 'March Dump',
+    cells: [
+      {x:0.06,y:0.05,w:0.24,h:0.16},
+      {x:0.70,y:0.02,w:0.24,h:0.16},
+      {x:0.40,y:0.18,w:0.24,h:0.15},
+      {x:0.04,y:0.46,w:0.16,h:0.16},
+      {x:0.66,y:0.50,w:0.28,h:0.22},
+      {x:0.30,y:0.66,w:0.22,h:0.18},
+      {x:0.66,y:0.78,w:0.26,h:0.16}
+    ],
+    titleAreas: [
+      {x:0.28,y:0.36,w:0.50,h:0.16, align:'center', size:'large', overlay:false},
+      {x:0.28,y:0.36,w:0.50,h:0.16, align:'center', size:'large', overlay:false, rotate:-3},
+      {x:0.06,y:0.30,w:0.40,h:0.10, align:'left', size:'medium', overlay:false},
+      {x:0.32,y:0.34,w:0.40,h:0.06, align:'center', size:'small', overlay:false}
+    ],
+    metaLabels: [
+      {x:0.06,y:0.96,w:0.40,h:0.03, align:'left'},
+      {x:0.06,y:0.00,w:0.40,h:0.03, align:'left'},
+      {x:0.60,y:0.96,w:0.34,h:0.03, align:'right'}
+    ]
+  },
+  {
+    id: 'minimal',
+    name: 'Minimal Single',
+    cells: [
+      {x:0.08,y:0.08,w:0.84,h:0.42}
+    ],
+    titleAreas: [
+      {x:0.08,y:0.56,w:0.84,h:0.30, align:'left', size:'large', overlay:false},
+      {x:0.08,y:0.56,w:0.84,h:0.30, align:'left', size:'large', overlay:false, rotate:-2},
+      {x:0.08,y:0.56,w:0.50,h:0.14, align:'left', size:'medium', overlay:false},
+      {x:0.08,y:0.86,w:0.84,h:0.08, align:'left', size:'small', overlay:false}
+    ],
+    metaLabels: [
+      {x:0.08,y:0.01,w:0.40,h:0.04, align:'left'},
+      {x:0.52,y:0.01,w:0.40,h:0.04, align:'right'},
+      {x:0.08,y:0.96,w:0.84,h:0.03, align:'left'}
+    ]
+  },
+  {
+    id: 'magazine',
+    name: 'Magazine Mix',
+    cells: [
+      {x:0.06,y:0.06,w:0.42,h:0.55},
+      {x:0.52,y:0.06,w:0.42,h:0.26},
+      {x:0.52,y:0.35,w:0.42,h:0.26},
+      {x:0.06,y:0.66,w:0.30,h:0.18},
+      {x:0.40,y:0.66,w:0.30,h:0.18}
+    ],
+    titleAreas: [
+      {x:0.06,y:0.86,w:0.88,h:0.10, align:'left', size:'large', overlay:false},
+      {x:0.06,y:0.86,w:0.88,h:0.10, align:'left', size:'large', overlay:false, rotate:-1},
+      {x:0.06,y:0.86,w:0.50,h:0.10, align:'left', size:'medium', overlay:false},
+      {x:0.52,y:0.61,w:0.42,h:0.07, align:'left', size:'small', overlay:false}
+    ],
+    metaLabels: [
+      {x:0.06,y:0.01,w:0.40,h:0.04, align:'left'},
+      {x:0.72,y:0.70,w:0.22,h:0.04, align:'right'},
+      {x:0.06,y:0.97,w:0.40,h:0.03, align:'left'}
+    ]
+  },
+  // ===== 10 new layouts =====
+  {
+    id: 'captioned_scatter',
+    name: 'Captioned Scatter',
+    mode: 'caption-cells',
+    cells: [
+      {x:0.06,y:0.04,w:0.22,h:0.15, captionPos:'right'},
+      {x:0.70,y:0.02,w:0.24,h:0.15, captionPos:'below'},
+      {x:0.06,y:0.22,w:0.20,h:0.12, captionPos:'below'},
+      {x:0.04,y:0.52,w:0.18,h:0.14, captionPos:'right'},
+      {x:0.70,y:0.52,w:0.24,h:0.18, captionPos:'left'},
+      {x:0.28,y:0.70,w:0.22,h:0.16, captionPos:'left'},
+      {x:0.68,y:0.76,w:0.24,h:0.16, captionPos:'left'}
+    ],
+    titleAreas: [
+      {x:0.26,y:0.40,w:0.52,h:0.10, align:'center', size:'large-serif', overlay:false},
+      {x:0.26,y:0.40,w:0.52,h:0.10, align:'center', size:'large-serif', overlay:false, rotate:-2}
+    ],
+    metaLabels: [
+      {x:0.06,y:0.96,w:0.40,h:0.03, align:'left'}
+    ]
+  },
+  {
+    id: 'album_grid',
+    name: 'Album 3×3',
+    mode: 'caption-cells',
+    cells: [
+      {x:0.04,y:0.10,w:0.30,h:0.22, captionPos:'below'},
+      {x:0.35,y:0.10,w:0.30,h:0.22, captionPos:'below'},
+      {x:0.66,y:0.10,w:0.30,h:0.22, captionPos:'below'},
+      {x:0.04,y:0.38,w:0.30,h:0.22, captionPos:'below'},
+      {x:0.35,y:0.38,w:0.30,h:0.22, captionPos:'below'},
+      {x:0.66,y:0.38,w:0.30,h:0.22, captionPos:'below'},
+      {x:0.04,y:0.66,w:0.30,h:0.22, captionPos:'below'},
+      {x:0.35,y:0.66,w:0.30,h:0.22, captionPos:'below'},
+      {x:0.66,y:0.66,w:0.30,h:0.22, captionPos:'below'}
+    ],
+    numberCaptions: true,
+    titleAreas: [
+      {x:0.04,y:0.02,w:0.92,h:0.06, align:'left', size:'small', overlay:false}
+    ],
+    metaLabels: []
+  },
+  {
+    id: 'letter_mosaic',
+    name: 'Letter Mosaic',
+    mode: 'letter-mosaic',
+    // Photos overlay specific positions over the huge background text
+    cells: [
+      {x:0.20,y:0.20,w:0.14,h:0.09},
+      {x:0.46,y:0.20,w:0.14,h:0.09},
+      {x:0.28,y:0.42,w:0.14,h:0.09},
+      {x:0.52,y:0.42,w:0.14,h:0.09},
+      {x:0.22,y:0.64,w:0.14,h:0.09}
+    ],
+    bgTextLines: ['The', 'best', 'of'],
+    topLabel: 'in the eyes of',
+    bottomLabel: '(april)',
+    titleAreas: [
+      {variant:0},
+      {variant:1}
+    ],
+    metaLabels: []
+  },
+  {
+    id: 'bubble_scatter',
+    name: 'Bubble Scatter',
+    mode: 'caption-cells',
+    cells: [
+      {x:0.05,y:0.46,w:0.13,h:0.10, captionPos:'below', shape:'circle'},
+      {x:0.30,y:0.38,w:0.14,h:0.10, captionPos:'below', shape:'circle'},
+      {x:0.55,y:0.42,w:0.13,h:0.10, captionPos:'below', shape:'circle'},
+      {x:0.78,y:0.36,w:0.16,h:0.12, captionPos:'below', shape:'circle'},
+      {x:0.15,y:0.64,w:0.16,h:0.12, captionPos:'below', shape:'circle'},
+      {x:0.40,y:0.60,w:0.14,h:0.10, captionPos:'below', shape:'circle'},
+      {x:0.62,y:0.66,w:0.15,h:0.11, captionPos:'below', shape:'circle'},
+      {x:0.08,y:0.82,w:0.14,h:0.10, captionPos:'below', shape:'circle'},
+      {x:0.78,y:0.80,w:0.14,h:0.10, captionPos:'below', shape:'circle'}
+    ],
+    parensCaption: true,
+    titleAreas: [
+      {x:0.10,y:0.06,w:0.80,h:0.20, align:'center', size:'large', overlay:false},
+      {x:0.06,y:0.06,w:0.88,h:0.20, align:'left', size:'large', overlay:false}
+    ],
+    metaLabels: [
+      {x:0.06,y:0.96,w:0.40,h:0.03, align:'left'}
+    ]
+  },
+  {
+    id: 'split_title',
+    name: 'Split Title',
+    mode: 'split-title',
+    cells: [
+      {x:0,y:0,w:1,h:0.50},
+      {x:0,y:0.50,w:1,h:0.50}
+    ],
+    splitLine: 0.50,
+    titleAreas: [
+      {x:0.05,y:0.36,w:0.90,h:0.30, align:'left', size:'large'},
+      {x:0.05,y:0.36,w:0.90,h:0.30, align:'center', size:'large'}
+    ],
+    metaLabels: [
+      {x:0.05,y:0.92,w:0.90,h:0.04, align:'center'}
+    ]
+  },
+  {
+    id: 'banner_text',
+    name: 'Banner Text',
+    mode: 'banner-text',
+    cells: [
+      {x:0,y:0,w:1,h:1}
+    ],
+    bannerWords: ['THE', 'OF', 'ART', 'NOTICING'],
+    bannerY: 0.45,
+    bannerYAlt: 0.74,
+    titleAreas: [
+      {variant:0},
+      {variant:1}
+    ],
+    metaLabels: [
+      {x:0.05,y:0.95,w:0.90,h:0.04, align:'left'}
+    ]
+  },
+  {
+    id: 'word_scatter',
+    name: 'Word Scatter',
+    mode: 'word-scatter',
+    cells: [
+      {x:0,y:0,w:1,h:0.34},
+      {x:0,y:0.34,w:1,h:0.34},
+      {x:0,y:0.68,w:1,h:0.32}
+    ],
+    scatterPositionsPerCell: [
+      [{x:0.30,y:0.18},{x:0.45,y:0.14},{x:0.18,y:0.22},{x:0.60,y:0.18},{x:0.75,y:0.14},{x:0.50,y:0.24}],
+      [{x:0.05,y:0.42},{x:0.22,y:0.50},{x:0.35,y:0.46},{x:0.18,y:0.54},{x:0.10,y:0.58}],
+      [{x:0.05,y:0.86},{x:0.42,y:0.84},{x:0.62,y:0.88},{x:0.30,y:0.90},{x:0.50,y:0.92},{x:0.72,y:0.90}]
+    ],
+    scatterPositionsPerCellAlt: [
+      [{x:0.06,y:0.16},{x:0.40,y:0.22},{x:0.62,y:0.16},{x:0.20,y:0.26},{x:0.78,y:0.22},{x:0.55,y:0.28}],
+      [{x:0.50,y:0.42},{x:0.65,y:0.50},{x:0.10,y:0.46},{x:0.78,y:0.54},{x:0.30,y:0.58}],
+      [{x:0.55,y:0.86},{x:0.10,y:0.84},{x:0.75,y:0.88},{x:0.35,y:0.90},{x:0.20,y:0.92},{x:0.62,y:0.90}]
+    ],
+    titleAreas: [
+      {variant:0},
+      {variant:1}
+    ],
+    metaLabels: []
+  },
+  {
+    id: 'justified_para',
+    name: 'Justified Paragraph',
+    mode: 'justified-para',
+    cells: [
+      {x:0.78,y:0.20,w:0.18,h:0.10},
+      {x:0.08,y:0.30,w:0.12,h:0.08},
+      {x:0.36,y:0.50,w:0.20,h:0.10},
+      {x:0.72,y:0.70,w:0.16,h:0.10},
+      {x:0.06,y:0.86,w:0.18,h:0.10}
+    ],
+    paraArea: {x:0.04,y:0.04,w:0.92,h:0.20},
+    paraAreaAlt: {x:0.04,y:0.76,w:0.92,h:0.20},
+    titleAreas: [
+      {variant:0},
+      {variant:1}
+    ],
+    metaLabels: []
+  },
+  {
+    id: 'text_wrap',
+    name: 'Text Wrap',
+    mode: 'text-wrap',
+    // Floats: alternating left/right within the text flow
+    cells: [
+      {float:'right', w:0.32, h:0.16, marginLeft:0.02, marginBottom:0.02},
+      {float:'left',  w:0.28, h:0.14, marginRight:0.02, marginBottom:0.02},
+      {float:'right', w:0.30, h:0.14, marginLeft:0.02, marginBottom:0.02},
+      {float:'left',  w:0.24, h:0.12, marginRight:0.02, marginBottom:0.02},
+      {float:'right', w:0.26, h:0.14, marginLeft:0.02, marginBottom:0.02},
+      {float:'left',  w:0.30, h:0.14, marginRight:0.02, marginBottom:0.02}
+    ],
+    textBox: {x:0.04,y:0.02,w:0.92,h:0.96},
+    titleAreas: [
+      {variant:0},
+      {variant:1}
+    ],
+    metaLabels: []
+  },
+  {
+    id: 'fragment_flow',
+    name: 'Fragment Flow',
+    mode: 'fragment-flow',
+    cells: [
+      {x:0.08,y:0.08,w:0.10,h:0.08},
+      {x:0.42,y:0.16,w:0.12,h:0.08},
+      {x:0.66,y:0.24,w:0.10,h:0.08},
+      {x:0.20,y:0.36,w:0.10,h:0.08},
+      {x:0.48,y:0.46,w:0.12,h:0.08},
+      {x:0.10,y:0.58,w:0.14,h:0.08},
+      {x:0.62,y:0.62,w:0.10,h:0.08}
+    ],
+    fragments: ['(In', 'No', 'Particular', '(Order)'],
+    fragmentPositions: [
+      {x:0.08,y:0.06,w:0.22,h:0.12},
+      {x:0.04,y:0.24,w:0.18,h:0.12},
+      {x:0.32,y:0.42,w:0.40,h:0.12},
+      {x:0.20,y:0.62,w:0.32,h:0.12}
+    ],
+    fragmentPositionsAlt: [
+      {x:0.50,y:0.06,w:0.22,h:0.12},
+      {x:0.60,y:0.24,w:0.18,h:0.12},
+      {x:0.10,y:0.44,w:0.40,h:0.12},
+      {x:0.40,y:0.78,w:0.32,h:0.12}
+    ],
+    topLabel: 'presenting',
+    bottomLabel: '— a series',
+    titleAreas: [
+      {variant:0},
+      {variant:1}
+    ],
+    metaLabels: []
+  }
+];
+
+const bgColors = [
+  {name:'white', val:'#ffffff', type:'solid', isLight:true},
+  {name:'black', val:'#1a1a1a', type:'solid', isLight:false},
+  {name:'gray', val:'#8a8a8a', type:'solid', isLight:false}
+];
+
+let customBgImage = null; // data URL of user-uploaded background image
+let useCustomBgImage = false; // true when custom bg image is selected
+let customBgColor = null; // hex color picked via eyedropper or extracted from photo
+let useCustomBgColor = false; // true when custom bg color is selected
+
+function relativeLuminance(hex){
+  hex = hex.replace('#','');
+  if(hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
+  const r = parseInt(hex.substring(0,2),16)/255;
+  const g = parseInt(hex.substring(2,4),16)/255;
+  const b = parseInt(hex.substring(4,6),16)/255;
+  return 0.2126*r + 0.7152*g + 0.0722*b;
+}
+
+function isLightBackground(){
+  if(useCustomBgImage) return false; // assume photos are busy; default to white text
+  if(useCustomBgColor && customBgColor) return relativeLuminance(customBgColor) > 0.5;
+  return !!bgColors[currentBgIdx].isLight;
+}
+
+function applyCanvasBackground(canvas){
+  canvas.style.backgroundImage = '';
+  if(useCustomBgImage && customBgImage){
+    canvas.style.backgroundImage = `url(${customBgImage})`;
+    canvas.style.backgroundSize = 'cover';
+    canvas.style.backgroundPosition = 'center';
+    canvas.style.backgroundColor = '';
+    return;
+  }
+  if(useCustomBgColor && customBgColor){
+    canvas.style.background = customBgColor;
+    return;
+  }
+  const bg = bgColors[currentBgIdx];
+  if(bg.type === 'gradient'){
+    canvas.style.background = bg.css;
+  } else {
+    canvas.style.background = bg.val;
+  }
+}
+
+async function drawCanvasBackground(ctx, W, H){
+  if(useCustomBgImage && customBgImage){
+    const img = await loadImage(customBgImage);
+    const imgRatio = img.width/img.height;
+    const boxRatio = W/H;
+    let drawW, drawH;
+    if(imgRatio > boxRatio){ drawH = H; drawW = drawH*imgRatio; }
+    else { drawW = W; drawH = drawW/imgRatio; }
+    const ox = (W-drawW)/2, oy = (H-drawH)/2;
+    ctx.drawImage(img, ox, oy, drawW, drawH);
+    return;
+  }
+  if(useCustomBgColor && customBgColor){
+    ctx.fillStyle = customBgColor;
+    ctx.fillRect(0,0,W,H);
+    return;
+  }
+  const bg = bgColors[currentBgIdx];
+  if(bg.type === 'gradient'){
+    let grad;
+    if(bg.dir === 'diagonal'){
+      grad = ctx.createLinearGradient(0, 0, W, H);
+    } else if(bg.dir === 'vertical'){
+      grad = ctx.createLinearGradient(0, 0, 0, H);
+    } else {
+      grad = ctx.createLinearGradient(0, 0, W, 0);
+    }
+    bg.stops.forEach(s => grad.addColorStop(s.offset, s.color));
+    ctx.fillStyle = grad;
+  } else {
+    ctx.fillStyle = bg.val;
+  }
+  ctx.fillRect(0,0,W,H);
+}
+
+let uploadedImages = []; // {url}
+let currentLayoutIdx = 0;
+let currentBgIdx = 0;
+let assignment = []; // image index per cell, or -1
+let cellSizes = []; // randomized scale per cell
+let titleAreaIdx = 0; // which titleAreas variant is active
+let titleColorOverride = null; // null = auto, or '#fff'/'#1a1a1a'
+
+// Build layout options UI
+// Accordion: click panel header to collapse/expand (exclusive - opening one closes others)
+const allPanels = Array.from(document.querySelectorAll('.controls > .panel'));
+allPanels.forEach((panel, idx) => {
+  const h2 = panel.querySelector('h2');
+  if(!h2) return;
+  h2.addEventListener('click', () => {
+    const wasCollapsed = panel.classList.contains('collapsed');
+    // collapse all panels
+    allPanels.forEach(p => p.classList.add('collapsed'));
+    // if it was collapsed, open it; if it was already open, leave all collapsed
+    if(wasCollapsed){
+      panel.classList.remove('collapsed');
+    }
+  });
+  // Default state: only panel 1 (Upload Photos) open, rest collapsed
+  if(idx !== 0){
+    panel.classList.add('collapsed');
+  }
+});
+
+const layoutOptionsEl = document.getElementById('layoutOptions');
+layouts.forEach((layout, idx) => {
+  const btn = document.createElement('div');
+  btn.className = 'layout-btn' + (idx===0 ? ' active' : '');
+  btn.dataset.idx = idx;
+  btn.title = layout.name;
+
+  const icon = document.createElement('div');
+  icon.className = 'icon';
+  layout.cells.forEach(c => {
+    const i = document.createElement('i');
+    i.style.left = (c.x*100)+'%';
+    i.style.top = (c.y*100)+'%';
+    i.style.width = (c.w*100)+'%';
+    i.style.height = (c.h*100)+'%';
+    icon.appendChild(i);
+  });
+
+  btn.appendChild(icon);
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.layout-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    currentLayoutIdx = idx;
+    initAssignment();
+    render();
+  });
+  layoutOptionsEl.appendChild(btn);
+});
+
+// Build bg options UI
+const bgOptionsEl = document.getElementById('bgOptions');
+bgColors.forEach((bg, idx) => {
+  const sw = document.createElement('div');
+  sw.className = 'bg-swatch' + (idx===0 ? ' active' : '');
+  sw.style.background = bg.type === 'gradient' ? bg.css : bg.val;
+  sw.title = bg.name;
+  sw.addEventListener('click', () => {
+    document.querySelectorAll('.bg-swatch, .bg-image-swatch, .eyedropper-swatch, #extractedColors .color-swatch').forEach(s=>s.classList.remove('active'));
+    sw.classList.add('active');
+    currentBgIdx = idx;
+    useCustomBgImage = false;
+    useCustomBgColor = false;
+    render();
+  });
+  bgOptionsEl.appendChild(sw);
+});
+
+// Custom background image upload swatch
+const bgImageSwatch = document.createElement('label');
+bgImageSwatch.className = 'bg-swatch bg-image-swatch';
+bgImageSwatch.title = '上傳背景圖片';
+bgImageSwatch.innerHTML = '<span class="bg-image-icon">+</span><input type="file" accept="image/*" style="display:none">';
+const bgImageInput = bgImageSwatch.querySelector('input');
+bgImageInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    customBgImage = ev.target.result;
+    useCustomBgImage = true;
+    useCustomBgColor = false;
+    bgImageSwatch.style.backgroundImage = `url(${customBgImage})`;
+    bgImageSwatch.style.backgroundSize = 'cover';
+    bgImageSwatch.classList.add('has-image');
+    document.querySelectorAll('.bg-swatch, .bg-image-swatch, .eyedropper-swatch, #extractedColors .color-swatch').forEach(s=>s.classList.remove('active'));
+    bgImageSwatch.classList.add('active');
+    render();
+  };
+  reader.readAsDataURL(file);
+});
+bgImageSwatch.addEventListener('click', (e) => {
+  // if image already set, clicking selects it (unless clicking re-triggers file picker via label+input default)
+  if(customBgImage && useCustomBgImage === false){
+    e.preventDefault();
+    useCustomBgImage = true;
+    useCustomBgColor = false;
+    document.querySelectorAll('.bg-swatch, .bg-image-swatch, .eyedropper-swatch, #extractedColors .color-swatch').forEach(s=>s.classList.remove('active'));
+    bgImageSwatch.classList.add('active');
+    render();
+  } else if(customBgImage && useCustomBgImage === true){
+    // already active - allow re-upload via default label behavior, do nothing extra
+  }
+});
+bgOptionsEl.appendChild(bgImageSwatch);
+
+// Eyedropper / custom color swatch
+const eyedropperSwatch = document.createElement('label');
+eyedropperSwatch.className = 'bg-swatch eyedropper-swatch';
+eyedropperSwatch.title = '吸色滴管 / 自訂顏色';
+eyedropperSwatch.innerHTML = '<span class="eyedropper-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/></svg></span><input type="color" value="#888888">';
+const eyedropperInput = eyedropperSwatch.querySelector('input');
+
+function applyCustomBgColor(hex){
+  useCustomBgImage = false;
+  customBgColor = hex;
+  useCustomBgColor = true;
+  eyedropperSwatch.style.background = hex;
+  eyedropperSwatch.classList.add('has-color');
+  document.querySelectorAll('.bg-swatch, .bg-image-swatch, .eyedropper-swatch, #extractedColors .color-swatch').forEach(s=>s.classList.remove('active'));
+  eyedropperSwatch.classList.add('active');
+  render();
+}
+
+eyedropperInput.addEventListener('input', (e) => {
+  applyCustomBgColor(e.target.value);
+});
+eyedropperSwatch.addEventListener('click', (e) => {
+  if('EyeDropper' in window){
+    e.preventDefault();
+    const eyeDropper = new EyeDropper();
+    eyeDropper.open().then(result => {
+      applyCustomBgColor(result.sRGBHex);
+    }).catch(()=>{});
+  }
+  // else: fall through to native color input picker
+});
+bgOptionsEl.appendChild(eyedropperSwatch);
+
+// Extract dominant color (~20% of pixels) from uploaded photos
+document.getElementById('extractColorBtn').addEventListener('click', async () => {
+  if(uploadedImages.length === 0){
+    alert('請先上傳照片');
+    return;
+  }
+  await extractDominantColors();
+});
+
+async function extractDominantColors(){
+  const histogram = {};
+  let totalPixels = 0;
+  const sampleSize = 48;
+  const bucket = 32; // quantize each channel to steps of 32 (8 levels per channel)
+  const sampleCanvas = document.createElement('canvas');
+  sampleCanvas.width = sampleSize; sampleCanvas.height = sampleSize;
+  const sctx = sampleCanvas.getContext('2d');
+
+  for(const img of uploadedImages){
+    let imageEl;
+    try{ imageEl = await loadImage(img.url); } catch(e){ continue; }
+    sctx.clearRect(0,0,sampleSize,sampleSize);
+    sctx.drawImage(imageEl, 0, 0, sampleSize, sampleSize);
+    const data = sctx.getImageData(0,0,sampleSize,sampleSize).data;
+    for(let i=0;i<data.length;i+=4){
+      const a = data[i+3];
+      if(a < 128) continue;
+      const qr = Math.min(255, Math.round(data[i]/bucket)*bucket);
+      const qg = Math.min(255, Math.round(data[i+1]/bucket)*bucket);
+      const qb = Math.min(255, Math.round(data[i+2]/bucket)*bucket);
+      const key = `${qr},${qg},${qb}`;
+      histogram[key] = (histogram[key]||0) + 1;
+      totalPixels++;
+    }
+  }
+
+  if(totalPixels === 0) return;
+
+  const entries = Object.entries(histogram).map(([key,count]) => {
+    const [r,g,b] = key.split(',').map(Number);
+    const hex = '#' + [r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('');
+    return {hex, count, pct: count/totalPixels};
+  });
+
+  // sort by closeness to 20% share, take top 5 candidates
+  entries.sort((a,b) => Math.abs(a.pct-0.20) - Math.abs(b.pct-0.20));
+  const top = entries.slice(0,5);
+
+  const container = document.getElementById('extractedColors');
+  container.innerHTML = '';
+  top.forEach((c, idx) => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch';
+    sw.style.background = c.hex;
+    sw.title = `${c.hex} · ${(c.pct*100).toFixed(0)}%`;
+    sw.addEventListener('click', () => {
+      container.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+      sw.classList.add('active');
+      applyExtractedBgColor(c.hex);
+    });
+    if(idx===0) sw.classList.add('active');
+    container.appendChild(sw);
+  });
+
+  // auto-apply the color closest to 20%
+  applyExtractedBgColor(top[0].hex);
+}
+
+function applyExtractedBgColor(hex){
+  useCustomBgImage = false;
+  customBgColor = hex;
+  useCustomBgColor = true;
+  document.querySelectorAll('.bg-swatch, .bg-image-swatch, .eyedropper-swatch').forEach(s=>s.classList.remove('active'));
+  render();
+}
+
+// Text color swatches
+const colorPalette = [
+  {name:'Auto', val:null, isAuto:true},
+  {name:'White', val:'#ffffff'},
+  {name:'Black', val:'#1a1a1a'},
+  {name:'Rust', val:'#a8423a'},
+  {name:'Mustard', val:'#f4e98a'},
+  {name:'Sea Blue', val:'#5b6e8c'},
+  {name:'Sage', val:'#a9b4a3'},
+  {name:'Plum', val:'#8a6fb0'}
+];
+const colorOptionsEl = document.getElementById('colorOptions');
+colorPalette.forEach((c) => {
+  const sw = document.createElement('div');
+  sw.className = 'color-swatch' + (c.isAuto ? ' auto active' : '');
+  if(!c.isAuto) sw.style.background = c.val;
+  sw.title = c.name;
+  sw.addEventListener('click', () => {
+    document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+    sw.classList.add('active');
+    titleColorOverride = c.val;
+    render();
+  });
+  colorOptionsEl.appendChild(sw);
+});
+
+// File upload
+document.getElementById('fileInput').addEventListener('change', (e) => {
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      uploadedImages.push({url: ev.target.result});
+      renderThumbs();
+      initAssignment();
+      render();
+    };
+    reader.readAsDataURL(file);
+  });
+});
+
+function renderThumbs(){
+  const thumbsEl = document.getElementById('thumbs');
+  thumbsEl.innerHTML = '';
+  uploadedImages.forEach((img, idx) => {
+    const div = document.createElement('div');
+    const i = document.createElement('img');
+    i.src = img.url;
+    const rm = document.createElement('button');
+    rm.className = 'remove';
+    rm.textContent = '×';
+    rm.addEventListener('click', (e) => {
+      e.stopPropagation();
+      uploadedImages.splice(idx,1);
+      renderThumbs();
+      initAssignment();
+      render();
+    });
+    div.appendChild(i);
+    div.appendChild(rm);
+    thumbsEl.appendChild(div);
+  });
+}
+
+function initAssignment(){
+  const layout = layouts[currentLayoutIdx];
+  const n = uploadedImages.length;
+  if(n === 0){
+    assignment = layout.cells.map(() => -1);
+    cellSizes = layout.cells.map(()=>({scale:1, ox:0, oy:0}));
+  } else if(n >= layout.cells.length){
+    assignment = layout.cells.map((_, i) => i);
+    cellSizes = layout.cells.map(()=>({scale:1, ox:0, oy:0}));
+  } else {
+    // fewer photos than cells: cycle through uploads, give repeats a slight random zoom/offset
+    assignment = layout.cells.map((_, i) => i % n);
+    cellSizes = layout.cells.map((_, i) => {
+      if(i < n) return {scale:1, ox:0, oy:0};
+      // repeated image: randomize crop so it doesn't look identical to its first occurrence
+      return {
+        scale: 1 + Math.random()*0.3,
+        ox: (Math.random()-0.5)*0.25,
+        oy: (Math.random()-0.5)*0.25
+      };
+    });
+  }
+  titleAreaIdx = 0;
+  // show all defined meta-label positions by default so editing the shared
+  // label text always has a visible effect, even before clicking Randomize
+  activeMetaLabels = (layout.metaLabels || []).map((_, i) => i);
+  metaLabelOrder = activeMetaLabels.map((_, i) => i);
+  // reset per-cell caption order (identity mapping into the shared label pool)
+  cellCaptionOrder = layout.cells.map((_, idx) => idx);
+}
+
+function shuffle(arr){
+  const a = [...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+document.getElementById('randomizeBtn').addEventListener('click', () => {
+  if(uploadedImages.length === 0) return;
+  const layout = layouts[currentLayoutIdx];
+  // shuffle which images go where
+  const numCells = layout.cells.length;
+  const indices = [];
+  for(let i=0;i<numCells;i++){
+    indices.push(i % uploadedImages.length);
+  }
+  assignment = shuffle(indices).map((v,i) => i < numCells ? v : -1).slice(0,numCells);
+  while(assignment.length < numCells) assignment.push(-1);
+
+  // randomize crop offsets/scale slightly
+  cellSizes = layout.cells.map(() => ({
+    scale: 1 + Math.random()*0.25,
+    ox: (Math.random()-0.5)*0.2,
+    oy: (Math.random()-0.5)*0.2
+  }));
+
+  // randomize text placement
+  titleAreaIdx = layout.titleAreas.length > 0 ? Math.floor(Math.random() * layout.titleAreas.length) : 0;
+
+  // randomize meta labels (Dutch-design micro captions): show 0 to all positions,
+  // and shuffle which line from the shared label pool appears at each position
+  const allMetaIdx = (layout.metaLabels || []).map((_,i)=>i);
+  const metaCount = allMetaIdx.length > 0 ? 1 + Math.floor(Math.random() * allMetaIdx.length) : 0;
+  activeMetaLabels = shuffle(allMetaIdx).slice(0, metaCount);
+  const labelLines = getLabelLines();
+  const labelIndices = labelLines.map((_, i) => i);
+  const shuffledLabelIndices = shuffle(labelIndices);
+  metaLabelOrder = {};
+  activeMetaLabels.forEach((posIdx, i) => {
+    metaLabelOrder[posIdx] = shuffledLabelIndices[i % shuffledLabelIndices.length];
+  });
+
+  // randomize per-cell caption order (which label goes on which cell)
+  if(layout.mode === 'caption-cells' && !layout.numberCaptions){
+    const indices = labelLines.map((_, i) => i);
+    const shuffled = shuffle(indices);
+    cellCaptionOrder = layout.cells.map((_, idx) => shuffled[idx % shuffled.length]);
+  }
+
+  render();
+});
+
+function render(){
+  const canvas = document.getElementById('canvas');
+  canvas.innerHTML = '';
+  applyCanvasBackground(canvas);
+
+  const layout = layouts[currentLayoutIdx];
+
+  // Dispatch to mode-specific renderers for new layouts
+  if(layout.mode){
+    return renderMode(canvas, layout);
+  }
+
+  // Title
+  const titleText = getTitleText();
+  if(layout.titleAreas && layout.titleAreas.length > 0){
+    const ta = layout.titleAreas[titleAreaIdx] || layout.titleAreas[0];
+    const fontStyle = document.getElementById('fontSelect').value;
+    const titleEl = document.createElement('div');
+    titleEl.className = 'canvas-title';
+    titleEl.style.left = (ta.x*100)+'%';
+    titleEl.style.top = (ta.y*100)+'%';
+    titleEl.style.width = (ta.w*100)+'%';
+    titleEl.style.height = (ta.h*100)+'%';
+    titleEl.style.display = 'flex';
+    titleEl.style.alignItems = 'center';
+    titleEl.style.justifyContent = ta.align==='center' ? 'center' : (ta.align==='right' ? 'flex-end':'flex-start');
+    titleEl.style.textAlign = ta.align;
+    titleEl.style.zIndex = ta.overlay ? '5' : '1';
+    if(ta.rotate){
+      titleEl.style.transform = `rotate(${ta.rotate}deg)`;
+      titleEl.style.transformOrigin = ta.align==='center' ? 'center' : (ta.align==='right' ? 'right center' : 'left center');
+    }
+
+    // color: explicit override > overlay-on-photo white > auto contrast with bg
+    let textColor;
+    if(titleColorOverride){
+      textColor = titleColorOverride;
+    } else if(ta.overlay){
+      textColor = '#ffffff';
+    } else {
+      const isLightBg = isLightBackground();
+      textColor = isLightBg ? '#1a1a1a' : '#ffffff';
+    }
+    titleEl.style.color = textColor;
+
+    let fontFamily = "'Archivo', sans-serif";
+    let fontWeight = '800';
+    let fontStyleCss = 'normal';
+    let baseSize = 7; // cqw, for "large"
+    let lineHeight = '1.05';
+    let letterSpacing = '-1px';
+
+    switch(fontStyle){
+      case 'playfair-bold':
+        fontFamily = "'Playfair Display', serif";
+        fontWeight = '700';
+        baseSize = 7;
+        break;
+      case 'playfair-italic':
+        fontFamily = "'Playfair Display', serif";
+        fontWeight = '600';
+        fontStyleCss = 'italic';
+        baseSize = 6.5;
+        break;
+      case 'cormorant':
+        fontFamily = "'Cormorant Garamond', serif";
+        fontWeight = '500';
+        baseSize = 8;
+        letterSpacing = '0px';
+        break;
+      case 'dm-serif-italic':
+        fontFamily = "'DM Serif Display', serif";
+        fontWeight = '400';
+        fontStyleCss = 'italic';
+        baseSize = 7;
+        break;
+      case 'archivo':
+        fontFamily = "'Archivo', sans-serif";
+        fontWeight = '900';
+        baseSize = 7;
+        break;
+      case 'space-grotesk':
+        fontFamily = "'Space Grotesk', sans-serif";
+        fontWeight = '700';
+        baseSize = 6.5;
+        break;
+      case 'caveat':
+        fontFamily = "'Caveat', cursive";
+        fontWeight = '600';
+        baseSize = 7;
+        letterSpacing = '0px';
+        break;
+    }
+
+    // size tiers: large = main title, medium = secondary headline, small = caption-style
+    let fontSize, fontWeightFinal, letterSpacingFinal;
+    if(ta.size === 'small'){
+      fontSize = (baseSize * 0.28) + 'cqw';
+      fontWeightFinal = '500';
+      lineHeight = '1.4';
+      letterSpacingFinal = '1.5px';
+      fontFamily = "'Space Grotesk', 'Archivo', sans-serif";
+      fontStyleCss = 'normal';
+    } else if(ta.size === 'medium'){
+      fontSize = (baseSize * 0.5) + 'cqw';
+      fontWeightFinal = fontWeight;
+      lineHeight = '1.15';
+      letterSpacingFinal = letterSpacing;
+    } else {
+      fontSize = baseSize + 'cqw';
+      fontWeightFinal = fontWeight;
+      letterSpacingFinal = letterSpacing;
+    }
+
+    titleEl.style.fontFamily = fontFamily;
+    titleEl.style.fontWeight = fontWeightFinal;
+    titleEl.style.fontStyle = fontStyleCss;
+    titleEl.style.fontSize = fontSize;
+    titleEl.style.lineHeight = lineHeight;
+    titleEl.style.letterSpacing = letterSpacingFinal;
+    titleEl.style.textTransform = ta.size === 'small' ? 'uppercase' : 'none';
+    titleEl.textContent = titleText;
+    canvas.appendChild(titleEl);
+  }
+
+  // Meta labels (Dutch-design micro captions, e.g. "REF — 2026")
+  const layoutMeta = layout.metaLabels || [];
+  activeMetaLabels.forEach(idx => {
+    const ma = layoutMeta[idx];
+    if(!ma) return;
+    const isLightBg = isLightBackground();
+    const metaEl = document.createElement('div');
+    metaEl.className = 'canvas-title';
+    metaEl.style.left = (ma.x*100)+'%';
+    metaEl.style.top = (ma.y*100)+'%';
+    metaEl.style.width = (ma.w*100)+'%';
+    metaEl.style.height = (ma.h*100)+'%';
+    metaEl.style.display = 'flex';
+    metaEl.style.alignItems = 'center';
+    metaEl.style.justifyContent = ma.align==='center' ? 'center' : (ma.align==='right' ? 'flex-end':'flex-start');
+    metaEl.style.textAlign = ma.align;
+    metaEl.style.color = titleColorOverride || (isLightBg ? '#1a1a1a' : '#ffffff');
+    metaEl.style.fontFamily = "'Space Grotesk', 'Archivo', sans-serif";
+    metaEl.style.fontWeight = '500';
+    metaEl.style.fontSize = '1.6cqw';
+    metaEl.style.letterSpacing = '2px';
+    metaEl.style.textTransform = 'uppercase';
+    metaEl.style.opacity = '0.75';
+    metaEl.textContent = getMetaLabelText(idx);
+    canvas.appendChild(metaEl);
+  });
+
+
+  // Cells
+  layout.cells.forEach((cellDef, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.style.left = (cellDef.x*100)+'%';
+    cell.style.top = (cellDef.y*100)+'%';
+    cell.style.width = (cellDef.w*100)+'%';
+    cell.style.height = (cellDef.h*100)+'%';
+
+    const imgIdx = assignment[idx];
+    if(imgIdx !== undefined && imgIdx >= 0 && uploadedImages[imgIdx]){
+      const img = document.createElement('img');
+      img.src = uploadedImages[imgIdx].url;
+      const sz = cellSizes[idx] || {scale:1,ox:0,oy:0};
+      img.style.transform = `scale(${sz.scale}) translate(${sz.ox*50}%, ${sz.oy*50}%)`;
+      cell.appendChild(img);
+
+      const num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = `(${idx+1})`;
+      cell.appendChild(num);
+    } else {
+      cell.classList.add('empty');
+    }
+
+    cell.addEventListener('click', () => {
+      if(uploadedImages.length === 0) return;
+      // cycle to next image
+      let next = (assignment[idx] === undefined ? -1 : assignment[idx]) + 1;
+      if(next >= uploadedImages.length) next = 0;
+      assignment[idx] = next;
+      render();
+    });
+
+    canvas.appendChild(cell);
+  });
+}
+
+// ============= MODE-SPECIFIC RENDERERS =============
+
+function renderMode(canvas, layout){
+  switch(layout.mode){
+    case 'caption-cells': return renderCaptionCells(canvas, layout);
+    case 'letter-mosaic': return renderLetterMosaic(canvas, layout);
+    case 'split-title': return renderSplitTitle(canvas, layout);
+    case 'banner-text': return renderBannerText(canvas, layout);
+    case 'word-scatter': return renderWordScatter(canvas, layout);
+    case 'justified-para': return renderJustifiedPara(canvas, layout);
+    case 'text-wrap': return renderTextWrap(canvas, layout);
+    case 'fragment-flow': return renderFragmentFlow(canvas, layout);
+  }
+}
+
+function helperCreateCell(cellDef, idx, opts){
+  opts = opts || {};
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  if(cellDef.shape === 'circle') cell.classList.add('circle');
+  if(opts.extraClass) cell.classList.add(opts.extraClass);
+  cell.style.left = (cellDef.x*100)+'%';
+  cell.style.top = (cellDef.y*100)+'%';
+  cell.style.width = (cellDef.w*100)+'%';
+  cell.style.height = (cellDef.h*100)+'%';
+  const imgIdx = assignment[idx];
+  if(imgIdx !== undefined && imgIdx >= 0 && uploadedImages[imgIdx]){
+    const img = document.createElement('img');
+    img.src = uploadedImages[imgIdx].url;
+    const sz = cellSizes[idx] || {scale:1,ox:0,oy:0};
+    img.style.transform = `scale(${sz.scale}) translate(${sz.ox*50}%, ${sz.oy*50}%)`;
+    cell.appendChild(img);
+  } else {
+    cell.classList.add('empty');
+  }
+  cell.addEventListener('click', () => {
+    if(uploadedImages.length === 0) return;
+    let next = (assignment[idx] === undefined ? -1 : assignment[idx]) + 1;
+    if(next >= uploadedImages.length) next = 0;
+    assignment[idx] = next;
+    render();
+  });
+  return cell;
+}
+
+function helperGetTextColor(layout){
+  if(titleColorOverride) return titleColorOverride;
+  const isLightBg = isLightBackground();
+  return isLightBg ? '#1a1a1a' : '#ffffff';
+}
+
+function helperRenderMetaLabels(canvas, layout){
+  const layoutMeta = layout.metaLabels || [];
+  const textColor = helperGetTextColor(layout);
+  activeMetaLabels.forEach(idx => {
+    const ma = layoutMeta[idx];
+    if(!ma) return;
+    const metaEl = document.createElement('div');
+    metaEl.className = 'canvas-title';
+    metaEl.style.left = (ma.x*100)+'%';
+    metaEl.style.top = (ma.y*100)+'%';
+    metaEl.style.width = (ma.w*100)+'%';
+    metaEl.style.height = (ma.h*100)+'%';
+    metaEl.style.display = 'flex';
+    metaEl.style.alignItems = 'center';
+    metaEl.style.justifyContent = ma.align==='center' ? 'center' : (ma.align==='right' ? 'flex-end':'flex-start');
+    metaEl.style.textAlign = ma.align;
+    metaEl.style.color = textColor;
+    metaEl.style.fontFamily = "'Space Grotesk', 'Archivo', sans-serif";
+    metaEl.style.fontWeight = '500';
+    metaEl.style.fontSize = '1.6cqw';
+    metaEl.style.letterSpacing = '2px';
+    metaEl.style.textTransform = 'uppercase';
+    metaEl.style.opacity = '0.75';
+    metaEl.textContent = getMetaLabelText(idx);
+    canvas.appendChild(metaEl);
+  });
+}
+
+// Caption Cells: photos with text labels next to each (March Dump, Album, Bubble Scatter)
+function renderCaptionCells(canvas, layout){
+  const textColor = helperGetTextColor(layout);
+
+  // Title in center (or as defined)
+  const titleText = getTitleText();
+  if(layout.titleAreas && layout.titleAreas.length > 0){
+    const ta = layout.titleAreas[titleAreaIdx] || layout.titleAreas[0];
+    const fontStyle = document.getElementById('fontSelect').value;
+    const titleEl = document.createElement('div');
+    titleEl.className = 'canvas-title';
+    titleEl.style.left = (ta.x*100)+'%';
+    titleEl.style.top = (ta.y*100)+'%';
+    titleEl.style.width = (ta.w*100)+'%';
+    titleEl.style.height = (ta.h*100)+'%';
+    titleEl.style.display = 'flex';
+    titleEl.style.alignItems = 'center';
+    titleEl.style.justifyContent = ta.align==='center' ? 'center' : (ta.align==='right' ? 'flex-end':'flex-start');
+    titleEl.style.textAlign = ta.align;
+    titleEl.style.color = textColor;
+    titleEl.style.lineHeight = '0.95';
+    if(ta.size === 'small'){
+      titleEl.style.fontFamily = "'Space Grotesk', sans-serif";
+      titleEl.style.fontSize = '1.8cqw';
+      titleEl.style.letterSpacing = '1px';
+      titleEl.style.textTransform = 'uppercase';
+      titleEl.style.fontWeight = '500';
+    } else if(ta.size === 'medium'){
+      const f = mapFontStyle(fontStyle);
+      titleEl.style.fontFamily = f.family;
+      titleEl.style.fontWeight = f.weight;
+      titleEl.style.fontStyle = f.style;
+      titleEl.style.fontSize = (f.scale * 4.5) + 'cqw';
+      titleEl.style.letterSpacing = f.spacing;
+    } else if(ta.size === 'large-serif'){
+      // Force editorial serif look (March dump style) regardless of font selector
+      titleEl.style.fontFamily = "'DM Serif Display','Playfair Display',serif";
+      titleEl.style.fontSize = '6cqw';
+      titleEl.style.lineHeight = '0.95';
+      titleEl.style.letterSpacing = '-1px';
+      titleEl.style.fontWeight = '400';
+      // First word roman, rest italic via inline span
+      const words = titleText.split(/\s+/);
+      if(words.length >= 2){
+        titleEl.innerHTML = `<span>${words[0]}</span><br><span style="font-style:italic;margin-left:1cqw">${words.slice(1).join(' ')}</span>`;
+        titleEl.style.display = 'block';
+        titleEl.style.textAlign = ta.align;
+      }
+    } else {
+      // map font style — favor serif italic for these collage layouts
+      const f = mapFontStyle(fontStyle);
+      titleEl.style.fontFamily = f.family;
+      titleEl.style.fontWeight = f.weight;
+      titleEl.style.fontStyle = f.style;
+      titleEl.style.fontSize = (f.scale * 7) + 'cqw';
+      titleEl.style.letterSpacing = f.spacing;
+    }
+    if(ta.rotate) titleEl.style.transform = `rotate(${ta.rotate}deg)`;
+    if(ta.size !== 'large-serif') titleEl.textContent = titleText;
+    canvas.appendChild(titleEl);
+  }
+
+  // Cells + per-cell captions
+  layout.cells.forEach((cellDef, idx) => {
+    const cell = helperCreateCell(cellDef, idx);
+    canvas.appendChild(cell);
+
+    const cap = getCellCaptionText(idx, layout);
+    if(cap){
+      const capEl = document.createElement('div');
+      capEl.className = 'cell-caption ' + (cellDef.captionPos || 'below');
+      if(layout.parensCaption) capEl.classList.add('parens');
+      capEl.style.color = textColor;
+      capEl.textContent = cap;
+
+      // position relative to cell
+      const pos = cellDef.captionPos || 'below';
+      const gap = 0.012;
+      if(pos === 'below'){
+        capEl.style.left = (cellDef.x*100)+'%';
+        capEl.style.top = ((cellDef.y + cellDef.h + gap)*100)+'%';
+        capEl.style.width = (cellDef.w*100)+'%';
+        capEl.style.textAlign = 'left';
+      } else if(pos === 'above'){
+        capEl.style.left = (cellDef.x*100)+'%';
+        capEl.style.top = ((cellDef.y - 0.035)*100)+'%';
+        capEl.style.width = (cellDef.w*100)+'%';
+      } else if(pos === 'right'){
+        capEl.style.left = ((cellDef.x + cellDef.w + gap)*100)+'%';
+        capEl.style.top = (cellDef.y*100)+'%';
+        capEl.style.height = (cellDef.h*100)+'%';
+        capEl.style.display = 'flex';
+        capEl.style.alignItems = 'flex-start';
+      } else if(pos === 'left'){
+        capEl.style.right = ((1 - cellDef.x + gap)*100)+'%';
+        capEl.style.top = (cellDef.y*100)+'%';
+        capEl.style.textAlign = 'right';
+        capEl.style.minWidth = '12%';
+      }
+      canvas.appendChild(capEl);
+    }
+  });
+
+  helperRenderMetaLabels(canvas, layout);
+}
+
+// Letter Mosaic: huge text background with photos overlaid
+function renderLetterMosaic(canvas, layout){
+  const textColor = helperGetTextColor(layout);
+  applyCanvasBackground(canvas);
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  const labels = getLabelLines();
+  const titleWords = getTitleText().split(/\s+/);
+  const bgLines = titleWords.length > 0 ? titleWords.slice(0,3) : layout.bgTextLines;
+
+  // Top label
+  const topLabel = document.createElement('div');
+  topLabel.style.position = 'absolute';
+  topLabel.style.top = '2%';
+  topLabel.style.color = textColor;
+  topLabel.style.fontFamily = "'Space Grotesk', sans-serif";
+  topLabel.style.fontSize = '1.8cqw';
+  topLabel.style.letterSpacing = '0.5px';
+  topLabel.textContent = labels[0];
+  if(variant === 0){
+    topLabel.style.left = '50%';
+    topLabel.style.transform = 'translateX(-50%)';
+  } else {
+    topLabel.style.right = '6%';
+    topLabel.style.textAlign = 'right';
+  }
+  canvas.appendChild(topLabel);
+
+  // Background huge text (derived from the main title)
+  const bgText = document.createElement('div');
+  bgText.className = 'letter-bg-text';
+  bgText.style.color = textColor;
+  bgText.style.top = '12%';
+  bgText.style.width = '88%';
+  if(variant === 0){
+    bgText.style.left = '6%';
+    bgText.style.textAlign = 'left';
+  } else {
+    bgText.style.left = '6%';
+    bgText.style.textAlign = 'right';
+  }
+  bgText.innerHTML = bgLines.map(l => `<div>${l}</div>`).join('');
+  canvas.appendChild(bgText);
+
+  // Photo cells overlaying letters
+  layout.cells.forEach((cellDef, idx) => {
+    const cell = helperCreateCell(cellDef, idx);
+    cell.style.zIndex = '3';
+    cell.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+    canvas.appendChild(cell);
+  });
+
+  // Bottom label (from the shared label pool)
+  const bottomText = labels[1 % labels.length] || labels[0];
+  const bottomLabel = document.createElement('div');
+  bottomLabel.style.position = 'absolute';
+  bottomLabel.style.bottom = '6%';
+  bottomLabel.style.color = textColor;
+  bottomLabel.style.fontFamily = "'Archivo', sans-serif";
+  bottomLabel.style.fontWeight = '900';
+  bottomLabel.style.fontSize = '6cqw';
+  bottomLabel.style.letterSpacing = '-1px';
+  bottomLabel.style.zIndex = '4';
+  if(variant === 0){
+    bottomLabel.style.left = '50%';
+    bottomLabel.style.transform = 'translateX(-50%)';
+  } else {
+    bottomLabel.style.right = '6%';
+  }
+  bottomLabel.textContent = bottomText.startsWith('(') ? bottomText : `(${bottomText})`;
+  canvas.appendChild(bottomLabel);
+}
+
+// Split Title: two stacked photos with text spanning across the divide
+function renderSplitTitle(canvas, layout){
+  layout.cells.forEach((cellDef, idx) => {
+    const cell = helperCreateCell(cellDef, idx);
+    canvas.appendChild(cell);
+  });
+
+  const titleText = getTitleText();
+  const fontStyle = document.getElementById('fontSelect').value;
+  const ta = layout.titleAreas[titleAreaIdx] || layout.titleAreas[0];
+  // Title block sitting on the split line (around y=0.36-0.66)
+  const wrap = document.createElement('div');
+  wrap.className = 'split-overlay-title';
+  wrap.style.left = (ta.x*100)+'%'; wrap.style.top = (ta.y*100)+'%'; wrap.style.width = (ta.w*100)+'%';
+  wrap.style.display = 'flex'; wrap.style.flexDirection = 'column';
+  wrap.style.alignItems = ta.align === 'center' ? 'center' : 'flex-start';
+  wrap.style.textAlign = ta.align === 'center' ? 'center' : 'left';
+  if(titleColorOverride) wrap.style.color = titleColorOverride;
+  // Split title into 2 parts: first half roman, second half italic
+  const parts = titleText.split(/\s+/);
+  const half = Math.ceil(parts.length / 2);
+  const romanPart = parts.slice(0, half).join(' ');
+  const italicPart = parts.slice(half).join(' ');
+
+  const roman = document.createElement('div');
+  roman.className = 'roman';
+  roman.textContent = romanPart;
+  wrap.appendChild(roman);
+
+  if(italicPart){
+    const italic = document.createElement('div');
+    italic.className = 'italic';
+    italic.textContent = italicPart;
+    italic.style.marginTop = '0.5cqw';
+    if(ta.align !== 'center') italic.style.marginLeft = '6cqw';
+    wrap.appendChild(italic);
+  }
+  canvas.appendChild(wrap);
+
+  helperRenderMetaLabels(canvas, layout);
+}
+
+// Banner Text: single image with horizontal text band of spread-out words
+function renderBannerText(canvas, layout){
+  layout.cells.forEach((cellDef, idx) => {
+    const cell = helperCreateCell(cellDef, idx);
+    canvas.appendChild(cell);
+  });
+
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  const bannerY = variant === 1 && layout.bannerYAlt !== undefined ? layout.bannerYAlt : layout.bannerY;
+
+  const titleWords = getTitleText().toUpperCase().split(/\s+/);
+  const words = titleWords.length >= 4 ? titleWords.slice(0,4) : cycleWords(titleWords, 4);
+  const band = document.createElement('div');
+  band.style.position = 'absolute';
+  band.style.left = '0'; band.style.right = '0';
+  band.style.top = (bannerY*100)+'%';
+  band.style.height = '14%';
+  band.style.background = 'rgba(0,0,0,0.25)';
+  band.style.zIndex = '4';
+  canvas.appendChild(band);
+
+  // Words spread horizontally
+  const wrap = document.createElement('div');
+  wrap.style.position = 'absolute';
+  wrap.style.left = '4%'; wrap.style.right = '4%';
+  wrap.style.top = (bannerY*100)+'%';
+  wrap.style.height = '14%';
+  wrap.style.display = 'flex';
+  wrap.style.flexDirection = 'column';
+  wrap.style.justifyContent = 'center';
+  wrap.style.zIndex = '5';
+
+  // arrange words in 1-2 rows depending on count
+  const isFour = words.length >= 4;
+  if(isFour){
+    const row1 = document.createElement('div');
+    row1.style.display='flex'; row1.style.justifyContent='space-between'; row1.style.width='100%';
+    const w1 = document.createElement('span'); w1.textContent = words[0];
+    const w2 = document.createElement('span'); w2.textContent = words[2] || '';
+    [w1,w2].forEach(s=>{ s.style.fontFamily="'Archivo',sans-serif"; s.style.fontWeight='700'; s.style.fontSize='5cqw'; s.style.color=(titleColorOverride || '#f4e98a'); s.style.letterSpacing='-1px'; });
+    row1.appendChild(w1); row1.appendChild(w2);
+
+    const row2 = document.createElement('div');
+    row2.style.display='flex'; row2.style.justifyContent='center'; row2.style.gap='3cqw'; row2.style.width='100%';
+    const w3 = document.createElement('span'); w3.textContent = words[1] || '';
+    const w4 = document.createElement('span'); w4.textContent = words[3] || '';
+    [w3,w4].forEach(s=>{ s.style.fontFamily="'Archivo',sans-serif"; s.style.fontWeight='700'; s.style.fontSize='5cqw'; s.style.color=(titleColorOverride || '#f4e98a'); s.style.letterSpacing='-1px'; });
+    row2.appendChild(w3); row2.appendChild(w4);
+    wrap.appendChild(row1); wrap.appendChild(row2);
+  } else {
+    const row = document.createElement('div');
+    row.style.display='flex'; row.style.justifyContent='space-between'; row.style.width='100%';
+    words.forEach(w => {
+      const s = document.createElement('span');
+      s.textContent = w;
+      s.style.fontFamily="'Archivo',sans-serif"; s.style.fontWeight='700'; s.style.fontSize='5cqw'; s.style.color=(titleColorOverride || '#f4e98a'); s.style.letterSpacing='-1px';
+      row.appendChild(s);
+    });
+    wrap.appendChild(row);
+  }
+  canvas.appendChild(wrap);
+
+  helperRenderMetaLabels(canvas, layout);
+}
+
+// Word Scatter: photos with words from title scattered at fixed positions
+function renderWordScatter(canvas, layout){
+  layout.cells.forEach((cellDef, idx) => {
+    const cell = helperCreateCell(cellDef, idx);
+    canvas.appendChild(cell);
+  });
+
+  const sourceWords = (getTitleText() + ' ' + getParagraphText()).split(/\s+/);
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  const posSet = (variant === 1 && layout.scatterPositionsPerCellAlt) ? layout.scatterPositionsPerCellAlt : layout.scatterPositionsPerCell;
+  const positions = posSet.flat();
+  const words = cycleWords(sourceWords, positions.length);
+
+  words.forEach((w, i) => {
+    const span = document.createElement('div');
+    span.className = 'scatter-word';
+    span.style.left = (positions[i].x * 100) + '%';
+    span.style.top = (positions[i].y * 100) + '%';
+    if(titleColorOverride) span.style.color = titleColorOverride;
+    span.textContent = w;
+    canvas.appendChild(span);
+  });
+}
+
+// Justified Paragraph: justified text at top, scattered small photos below
+function renderJustifiedPara(canvas, layout){
+  // Photos
+  layout.cells.forEach((cellDef, idx) => {
+    const cell = helperCreateCell(cellDef, idx);
+    canvas.appendChild(cell);
+  });
+
+  const paraText = getParagraphText();
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  const paraArea = (variant === 1 && layout.paraAreaAlt) ? layout.paraAreaAlt : layout.paraArea;
+  const para = document.createElement('div');
+  para.className = 'justified-para';
+  para.style.left = (paraArea.x*100)+'%';
+  para.style.top = (paraArea.y*100)+'%';
+  para.style.width = (paraArea.w*100)+'%';
+  if(titleColorOverride) para.style.color = titleColorOverride;
+  para.textContent = paraText;
+  canvas.appendChild(para);
+}
+
+// Text Wrap: narrative text with floated photos that text genuinely wraps around
+function renderTextWrap(canvas, layout){
+  const wrapText = getParagraphText();
+
+  const container = document.createElement('div');
+  container.className = 'wrap-text-container';
+  container.style.left = (layout.textBox.x*100)+'%';
+  container.style.top = (layout.textBox.y*100)+'%';
+  container.style.width = (layout.textBox.w*100)+'%';
+  container.style.height = (layout.textBox.h*100)+'%';
+  container.style.color = helperGetTextColor(layout);
+
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+
+  // Insert floated photo cells first - they appear in source order and float into the text
+  layout.cells.forEach((cellDef, idx) => {
+    const imgIdx = assignment[idx];
+    const photoEl = document.createElement('div');
+    photoEl.className = 'wrap-photo';
+    const floatSide = variant === 1 ? (cellDef.float === 'left' ? 'right' : 'left') : cellDef.float;
+    photoEl.style.float = floatSide;
+    photoEl.style.width = (cellDef.w*100)+'%';
+    // height: use aspect from cellDef.h relative to box
+    photoEl.style.height = (cellDef.h * (layout.textBox.h / layout.textBox.w) * 100) + '%';
+    // actually simpler: just set aspect via padding-bottom trick or directly
+    photoEl.style.height = '0';
+    photoEl.style.paddingBottom = ((cellDef.h / cellDef.w) * cellDef.w * 100) + '%';
+    photoEl.style.position = 'relative';
+
+    const mb = (cellDef.marginBottom || 0.02) * 100;
+    const mr = (cellDef.marginRight || 0) * 100;
+    const ml = (cellDef.marginLeft || 0) * 100;
+    photoEl.style.marginBottom = mb + '%';
+    if(floatSide === 'left'){
+      photoEl.style.marginRight = mr + '%';
+    } else {
+      photoEl.style.marginLeft = ml + '%';
+    }
+
+    if(imgIdx !== undefined && imgIdx >= 0 && uploadedImages[imgIdx]){
+      const img = document.createElement('img');
+      img.src = uploadedImages[imgIdx].url;
+      img.style.position = 'absolute';
+      img.style.top = '0'; img.style.left = '0';
+      img.style.width = '100%'; img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      const sz = cellSizes[idx] || {scale:1,ox:0,oy:0};
+      img.style.transform = `scale(${sz.scale}) translate(${sz.ox*50}%, ${sz.oy*50}%)`;
+      photoEl.appendChild(img);
+    }
+    photoEl.addEventListener('click', () => {
+      if(uploadedImages.length === 0) return;
+      let next = (assignment[idx] === undefined ? -1 : assignment[idx]) + 1;
+      if(next >= uploadedImages.length) next = 0;
+      assignment[idx] = next;
+      render();
+    });
+    photoEl.style.pointerEvents = 'auto';
+    container.appendChild(photoEl);
+  });
+
+  // Text node after the floats - browser will wrap text around them
+  const textNode = document.createTextNode(wrapText);
+  container.appendChild(textNode);
+
+  canvas.appendChild(container);
+}
+
+// Fragment Flow: text fragments interleaved with tiny photos
+function renderFragmentFlow(canvas, layout){
+  const textColor = helperGetTextColor(layout);
+  const labels = getLabelLines();
+  const titleWords = getTitleText().split(/\s+/);
+  const baseWords = cycleWords(titleWords, 4);
+  const frags = baseWords.map((w,i,arr)=>{
+    if(i===0) return '(' + w;
+    if(i===arr.length-1) return w + ')';
+    return w;
+  });
+
+  // top label
+  const top = document.createElement('div');
+  top.style.position='absolute'; top.style.left='6%'; top.style.top='2%';
+  top.style.color = textColor;
+  top.style.fontFamily="'Space Grotesk',sans-serif";
+  top.style.fontSize='1.6cqw'; top.style.letterSpacing='1px';
+  top.textContent = labels[0];
+  canvas.appendChild(top);
+
+  // Photos (small, scattered)
+  layout.cells.forEach((cellDef, idx) => {
+    const cell = helperCreateCell(cellDef, idx);
+    canvas.appendChild(cell);
+  });
+
+  // Fragments
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  const fragPositions = (variant === 1 && layout.fragmentPositionsAlt) ? layout.fragmentPositionsAlt : layout.fragmentPositions;
+  frags.forEach((frag, i) => {
+    const pos = fragPositions[i] || fragPositions[fragPositions.length-1];
+    const el = document.createElement('div');
+    el.className = 'fragment-text';
+    el.style.left = (pos.x*100)+'%';
+    el.style.top = (pos.y*100)+'%';
+    el.style.color = textColor;
+    el.textContent = frag;
+    canvas.appendChild(el);
+  });
+
+  // Bottom label
+  const bot = document.createElement('div');
+  bot.style.position='absolute'; bot.style.left='6%'; bot.style.bottom='4%';
+  bot.style.color = textColor;
+  bot.style.fontFamily="'Space Grotesk',sans-serif";
+  bot.style.fontSize='1.6cqw'; bot.style.letterSpacing='1px';
+  bot.textContent = labels[1 % labels.length] || labels[0];
+  canvas.appendChild(bot);
+}
+
+function mapFontStyle(fontStyle){
+  switch(fontStyle){
+    case 'playfair-bold': return {family:"'Playfair Display',serif",weight:'700',style:'normal',scale:1,spacing:'-1px'};
+    case 'playfair-italic': return {family:"'Playfair Display',serif",weight:'600',style:'italic',scale:0.95,spacing:'-1px'};
+    case 'cormorant': return {family:"'Cormorant Garamond',serif",weight:'500',style:'normal',scale:1.15,spacing:'0px'};
+    case 'dm-serif-italic': return {family:"'DM Serif Display',serif",weight:'400',style:'italic',scale:1,spacing:'-1px'};
+    case 'archivo': return {family:"'Archivo',sans-serif",weight:'900',style:'normal',scale:1,spacing:'-1px'};
+    case 'space-grotesk': return {family:"'Space Grotesk',sans-serif",weight:'700',style:'normal',scale:0.95,spacing:'-1px'};
+    case 'caveat': return {family:"'Caveat',cursive",weight:'600',style:'normal',scale:1,spacing:'0px'};
+    default: return {family:"'Archivo',sans-serif",weight:'900',style:'normal',scale:1,spacing:'-1px'};
+  }
+}
+
+document.getElementById('titleInput').addEventListener('input', render);
+document.getElementById('fontSelect').addEventListener('change', render);
+
+// Export
+document.getElementById('exportBtn').addEventListener('click', async () => {
+  if(uploadedImages.length === 0){
+    alert('請先上傳照片');
+    return;
+  }
+  await document.fonts.ready;
+  const exportWidth = 1080;
+  const exportHeight = 1440;
+
+  const canvasEl = document.createElement('canvas');
+  canvasEl.width = exportWidth;
+  canvasEl.height = exportHeight;
+  const ctx = canvasEl.getContext('2d');
+
+  // background
+  await drawCanvasBackground(ctx, exportWidth, exportHeight);
+
+  const layout = layouts[currentLayoutIdx];
+
+  // Dispatch to mode-specific export for new layouts
+  if(layout.mode){
+    await exportMode(ctx, layout, exportWidth, exportHeight);
+    const link = document.createElement('a');
+    link.download = 'collage.png';
+    link.href = canvasEl.toDataURL('image/png');
+    link.click();
+    return;
+  }
+
+  // draw cells
+  for(let idx=0; idx<layout.cells.length; idx++){
+    const c = layout.cells[idx];
+    const imgIdx = assignment[idx];
+    const px = c.x*exportWidth, py = c.y*exportHeight, pw = c.w*exportWidth, ph = c.h*exportHeight;
+
+    if(imgIdx !== undefined && imgIdx >= 0 && uploadedImages[imgIdx]){
+      const img = await loadImage(uploadedImages[imgIdx].url);
+      const sz = cellSizes[idx] || {scale:1,ox:0,oy:0};
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(px, py, pw, ph);
+      ctx.clip();
+
+      // cover-fit with scale & offset
+      const scale = sz.scale;
+      const imgRatio = img.width/img.height;
+      const cellRatio = pw/ph;
+      let drawW, drawH;
+      if(imgRatio > cellRatio){
+        drawH = ph*scale;
+        drawW = drawH*imgRatio;
+      } else {
+        drawW = pw*scale;
+        drawH = drawW/imgRatio;
+      }
+      const offsetX = px + (pw-drawW)/2 + sz.ox*pw*0.5;
+      const offsetY = py + (ph-drawH)/2 + sz.oy*ph*0.5;
+      ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+      ctx.restore();
+
+      // number label
+      ctx.fillStyle = 'rgba(255,255,255,0.9)';
+      ctx.font = 'italic 18px "Playfair Display", Georgia';
+      ctx.fillText(`(${idx+1})`, px+10, py+24);
+    } else {
+      ctx.fillStyle = '#d8d4ce';
+      ctx.fillRect(px,py,pw,ph);
+    }
+  }
+
+  // draw title
+  const titleText = getTitleText();
+  if(true){
+    const ta = layout.titleAreas[titleAreaIdx] || layout.titleAreas[0];
+    const fontStyle = document.getElementById('fontSelect').value;
+
+    let textColor;
+    if(titleColorOverride){
+      textColor = titleColorOverride;
+    } else if(ta.overlay){
+      textColor = '#ffffff';
+    } else {
+      const isLightBg = isLightBackground();
+      textColor = isLightBg ? '#1a1a1a' : '#ffffff';
+    }
+    ctx.fillStyle = textColor;
+
+    let baseSize = exportWidth*0.075;
+    let fontFamily = 'Archivo';
+    let fontWeight = '900';
+    let fontStyleCss = 'normal';
+
+    switch(fontStyle){
+      case 'playfair-bold':
+        fontFamily = 'Playfair Display'; fontWeight='700'; baseSize = exportWidth*0.075; break;
+      case 'playfair-italic':
+        fontFamily = 'Playfair Display'; fontWeight='600'; fontStyleCss='italic'; baseSize = exportWidth*0.07; break;
+      case 'cormorant':
+        fontFamily = 'Cormorant Garamond'; fontWeight='500'; baseSize = exportWidth*0.085; break;
+      case 'dm-serif-italic':
+        fontFamily = 'DM Serif Display'; fontWeight='400'; fontStyleCss='italic'; baseSize = exportWidth*0.075; break;
+      case 'archivo':
+        fontFamily = 'Archivo'; fontWeight='900'; baseSize = exportWidth*0.075; break;
+      case 'space-grotesk':
+        fontFamily = 'Space Grotesk'; fontWeight='700'; baseSize = exportWidth*0.07; break;
+      case 'caveat':
+        fontFamily = 'Caveat'; fontWeight='600'; baseSize = exportWidth*0.075; break;
+    }
+
+    let fontSize, fontWeightFinal, letterSpacingFinal, useUppercase;
+    if(ta.size === 'small'){
+      fontSize = baseSize * 0.28;
+      fontWeightFinal = '500';
+      fontFamily = 'Space Grotesk';
+      fontStyleCss = 'normal';
+      letterSpacingFinal = fontSize * 0.06;
+      useUppercase = true;
+    } else if(ta.size === 'medium'){
+      fontSize = baseSize * 0.5;
+      fontWeightFinal = fontWeight;
+      letterSpacingFinal = 0;
+      useUppercase = false;
+    } else {
+      fontSize = baseSize;
+      fontWeightFinal = fontWeight;
+      letterSpacingFinal = 0;
+      useUppercase = false;
+    }
+
+    ctx.font = `${fontStyleCss} ${fontWeightFinal} ${fontSize}px "${fontFamily}"`;
+    if(ctx.letterSpacing !== undefined) ctx.letterSpacing = letterSpacingFinal + 'px';
+
+    const tx = ta.x*exportWidth;
+    const ty = ta.y*exportHeight;
+    const tw = ta.w*exportWidth;
+
+    ctx.textAlign = ta.align === 'center' ? 'center' : (ta.align === 'right' ? 'right':'left');
+    let drawX = tx;
+    if(ta.align==='center') drawX = tx + tw/2;
+    if(ta.align==='right') drawX = tx + tw;
+
+    // wrap text
+    const displayText = useUppercase ? titleText.toUpperCase() : titleText;
+    const words = displayText.split(' ');
+    const lines = [];
+    let line = '';
+    for(const word of words){
+      const test = line ? line+' '+word : word;
+      if(ctx.measureText(test).width > tw && line){
+        lines.push(line);
+        line = word;
+      } else {
+        line = test;
+      }
+    }
+    if(line) lines.push(line);
+
+    const lineHeight = ta.size === 'small' ? fontSize*1.4 : (ta.size === 'medium' ? fontSize*1.15 : fontSize*1.1);
+
+    ctx.save();
+    if(ta.rotate){
+      // rotate around the anchor point (drawX, vertical center of text block)
+      const blockHeight = lineHeight * lines.length;
+      const anchorY = ty + blockHeight/2;
+      ctx.translate(drawX, anchorY);
+      ctx.rotate(ta.rotate * Math.PI/180);
+      ctx.translate(-drawX, -anchorY);
+    }
+
+    let lineY = ty + fontSize;
+    lines.forEach(l => {
+      ctx.fillText(l, drawX, lineY);
+      lineY += lineHeight;
+    });
+    ctx.restore();
+    if(ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+  }
+
+  // draw meta labels (Dutch-design micro captions)
+  const layoutMeta = layout.metaLabels || [];
+  activeMetaLabels.forEach(idx => {
+    const ma = layoutMeta[idx];
+    if(!ma) return;
+    const text = getMetaLabelText(idx);
+    const isLightBg = isLightBackground();
+    if(titleColorOverride){
+      ctx.fillStyle = hexToRgba(titleColorOverride, 0.75);
+    } else {
+      ctx.fillStyle = isLightBg ? 'rgba(26,26,26,0.75)' : 'rgba(255,255,255,0.75)';
+    }
+    const metaFontSize = exportWidth * 0.016;
+    ctx.font = `500 ${metaFontSize}px "Space Grotesk"`;
+    if(ctx.letterSpacing !== undefined) ctx.letterSpacing = (metaFontSize*0.15) + 'px';
+
+    const mx = ma.x*exportWidth;
+    const my = ma.y*exportHeight;
+    const mw = ma.w*exportWidth;
+
+    ctx.textAlign = ma.align === 'center' ? 'center' : (ma.align === 'right' ? 'right':'left');
+    let mdrawX = mx;
+    if(ma.align==='center') mdrawX = mx + mw/2;
+    if(ma.align==='right') mdrawX = mx + mw;
+
+    ctx.fillText(text, mdrawX, my + metaFontSize);
+    if(ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+  });
+
+  // download
+  const link = document.createElement('a');
+  link.download = 'collage.png';
+  link.href = canvasEl.toDataURL('image/png');
+  link.click();
+});
+
+// ============= EXPORT CANVAS RENDERERS FOR NEW MODES =============
+
+async function exportMode(ctx, layout, W, H){
+  switch(layout.mode){
+    case 'caption-cells': return await exportCaptionCells(ctx, layout, W, H);
+    case 'letter-mosaic': return await exportLetterMosaic(ctx, layout, W, H);
+    case 'split-title':   return await exportSplitTitle(ctx, layout, W, H);
+    case 'banner-text':   return await exportBannerText(ctx, layout, W, H);
+    case 'word-scatter':  return await exportWordScatter(ctx, layout, W, H);
+    case 'justified-para':return await exportJustifiedPara(ctx, layout, W, H);
+    case 'text-wrap':     return await exportTextWrap(ctx, layout, W, H);
+    case 'fragment-flow': return await exportFragmentFlow(ctx, layout, W, H);
+  }
+}
+
+function getCtxTextColor(){
+  if(titleColorOverride) return titleColorOverride;
+  const isLightBg = isLightBackground();
+  return isLightBg ? '#1a1a1a' : '#ffffff';
+}
+
+function hexToRgba(hex, alpha){
+  hex = hex.replace('#','');
+  if(hex.length === 3) hex = hex.split('').map(c=>c+c).join('');
+  const r = parseInt(hex.substring(0,2),16);
+  const g = parseInt(hex.substring(2,4),16);
+  const b = parseInt(hex.substring(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+async function drawCellImage(ctx, layout, cellDef, idx, W, H){
+  const px = cellDef.x*W, py = cellDef.y*H, pw = cellDef.w*W, ph = cellDef.h*H;
+  const imgIdx = assignment[idx];
+  if(imgIdx === undefined || imgIdx < 0 || !uploadedImages[imgIdx]){
+    ctx.fillStyle = '#d8d4ce';
+    if(cellDef.shape === 'circle'){
+      ctx.beginPath();
+      ctx.ellipse(px+pw/2, py+ph/2, pw/2, ph/2, 0, 0, Math.PI*2);
+      ctx.fill();
+    } else {
+      ctx.fillRect(px,py,pw,ph);
+    }
+    return;
+  }
+  const img = await loadImage(uploadedImages[imgIdx].url);
+  const sz = cellSizes[idx] || {scale:1,ox:0,oy:0};
+  ctx.save();
+  if(cellDef.shape === 'circle'){
+    ctx.beginPath();
+    ctx.ellipse(px+pw/2, py+ph/2, pw/2, ph/2, 0, 0, Math.PI*2);
+    ctx.clip();
+  } else {
+    ctx.beginPath();
+    ctx.rect(px, py, pw, ph);
+    ctx.clip();
+  }
+  const scale = sz.scale;
+  const imgRatio = img.width/img.height;
+  const cellRatio = pw/ph;
+  let drawW, drawH;
+  if(imgRatio > cellRatio){ drawH = ph*scale; drawW = drawH*imgRatio; }
+  else { drawW = pw*scale; drawH = drawW/imgRatio; }
+  const offsetX = px + (pw-drawW)/2 + sz.ox*pw*0.5;
+  const offsetY = py + (ph-drawH)/2 + sz.oy*ph*0.5;
+  ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+  ctx.restore();
+}
+
+function drawMetaLabels(ctx, layout, W, H){
+  const color = getCtxTextColor();
+  const layoutMeta = layout.metaLabels || [];
+  activeMetaLabels.forEach(idx => {
+    const ma = layoutMeta[idx];
+    if(!ma) return;
+    const text = getMetaLabelText(idx);
+    ctx.fillStyle = color === '#1a1a1a' ? 'rgba(26,26,26,0.75)' : 'rgba(255,255,255,0.75)';
+    const fs = W * 0.016;
+    ctx.font = `500 ${fs}px "Space Grotesk"`;
+    if(ctx.letterSpacing !== undefined) ctx.letterSpacing = (fs*0.15)+'px';
+    const mx = ma.x*W, my = ma.y*H, mw = ma.w*W;
+    ctx.textAlign = ma.align === 'center' ? 'center' : (ma.align === 'right' ? 'right':'left');
+    let dx = mx;
+    if(ma.align==='center') dx = mx+mw/2;
+    if(ma.align==='right') dx = mx+mw;
+    ctx.fillText(text, dx, my+fs);
+    if(ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+  });
+}
+
+async function exportCaptionCells(ctx, layout, W, H){
+  // Cells
+  for(let idx=0; idx<layout.cells.length; idx++){
+    await drawCellImage(ctx, layout, layout.cells[idx], idx, W, H);
+  }
+
+  const color = getCtxTextColor();
+
+  // Title
+  const titleText = getTitleText();
+  if(layout.titleAreas && layout.titleAreas.length > 0){
+    const ta = layout.titleAreas[titleAreaIdx] || layout.titleAreas[0];
+    const fontStyle = document.getElementById('fontSelect').value;
+    ctx.fillStyle = color;
+    let fs, family='Archivo', weight='900', style='normal';
+    let titleHandled = false;
+    if(ta.size === 'small'){
+      fs = W*0.018; family='Space Grotesk'; weight='500';
+      if(ctx.letterSpacing !== undefined) ctx.letterSpacing = '1px';
+    } else if(ta.size === 'large-serif'){
+      // Big editorial serif (March dump look) — mixed roman/italic
+      // Match DOM's font-size: '6cqw' (6% of canvas width)
+      fs = W*0.06;
+      family='DM Serif Display';
+      weight='400';
+      ctx.font = `${weight} ${fs}px "${family}"`;
+      const tx = ta.x*W, ty = ta.y*H, tw = ta.w*W;
+      const drawX = ta.align==='center' ? tx+tw/2 : (ta.align==='right' ? tx+tw : tx);
+      ctx.textAlign = ta.align==='center' ? 'center' : (ta.align==='right' ? 'right':'left');
+      const words = titleText.split(/\s+/);
+      const firstLine = words[0];
+      const restLine = words.slice(1).join(' ');
+      ctx.save();
+      if(ta.rotate){
+        const cy = ty + fs;
+        ctx.translate(drawX, cy);
+        ctx.rotate(ta.rotate*Math.PI/180);
+        ctx.translate(-drawX, -cy);
+      }
+      ctx.fillText(firstLine, drawX, ty + fs);
+      if(restLine){
+        ctx.font = `italic 400 ${fs}px "${family}"`;
+        const indentX = ta.align==='center' ? drawX : drawX + W*0.02;
+        ctx.fillText(restLine, indentX, ty + fs + fs*0.95);
+      }
+      ctx.restore();
+      titleHandled = true;
+    } else if(ta.size === 'medium'){
+      const f = mapFontStyle(fontStyle);
+      fs = W * 0.045 * f.scale;
+      family = f.family.split(',')[0].replace(/['"]/g,'').trim();
+      weight = f.weight;
+      style = f.style;
+    } else {
+      const f = mapFontStyle(fontStyle);
+      fs = W * 0.07 * f.scale;
+      family = f.family.split(',')[0].replace(/['"]/g,'').trim();
+      weight = f.weight;
+      style = f.style;
+    }
+
+    if(!titleHandled){
+    ctx.font = `${style} ${weight} ${fs}px "${family}"`;
+    const tx = ta.x*W, ty = ta.y*H, tw = ta.w*W, th = ta.h*H;
+    ctx.textAlign = ta.align==='center' ? 'center' : (ta.align==='right' ? 'right' : 'left');
+    let drawX = tx;
+    if(ta.align==='center') drawX = tx+tw/2;
+    if(ta.align==='right') drawX = tx+tw;
+
+    let displayText = ta.size === 'small' ? titleText.toUpperCase() : titleText;
+    const words = displayText.split(' ');
+    const lines = [];
+    let line = '';
+    for(const word of words){
+      const test = line ? line+' '+word : word;
+      if(ctx.measureText(test).width > tw && line){ lines.push(line); line=word; }
+      else { line = test; }
+    }
+    if(line) lines.push(line);
+
+    ctx.save();
+    if(ta.rotate){
+      const bh = fs*1.1*lines.length;
+      ctx.translate(drawX, ty+bh/2);
+      ctx.rotate(ta.rotate*Math.PI/180);
+      ctx.translate(-drawX, -(ty+bh/2));
+    }
+    let ly = ty+fs;
+    lines.forEach(l => { ctx.fillText(l, drawX, ly); ly += fs*1.05; });
+    ctx.restore();
+    if(ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+    }
+  }
+
+  // Per-cell captions
+  ctx.fillStyle = color;
+  layout.cells.forEach((cellDef, idx) => {
+    const cap = getCellCaptionText(idx, layout);
+    if(!cap) return;
+    const fs = W * 0.014;
+    const family = layout.parensCaption ? 'Playfair Display' : 'Space Grotesk';
+    const style = layout.parensCaption ? 'italic' : 'normal';
+    ctx.font = `${style} 400 ${fs}px "${family}"`;
+    const pos = cellDef.captionPos || 'below';
+    const gap = 0.012;
+    const px = cellDef.x*W, py = cellDef.y*H, pw = cellDef.w*W, ph = cellDef.h*H;
+    if(pos === 'below'){
+      ctx.textAlign = 'left';
+      ctx.fillText(cap, px, py+ph+gap*H+fs);
+    } else if(pos === 'above'){
+      ctx.textAlign = 'left';
+      ctx.fillText(cap, px, py-gap*H);
+    } else if(pos === 'right'){
+      ctx.textAlign = 'left';
+      ctx.fillText(cap, px+pw+gap*W, py+fs);
+    } else if(pos === 'left'){
+      ctx.textAlign = 'right';
+      ctx.fillText(cap, px-gap*W, py+fs);
+    }
+  });
+
+  drawMetaLabels(ctx, layout, W, H);
+}
+
+async function exportLetterMosaic(ctx, layout, W, H){
+  const color = getCtxTextColor();
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  const labels = getLabelLines();
+  const titleWords = getTitleText().split(/\s+/);
+  const bgLines = titleWords.length > 0 ? titleWords.slice(0,3) : layout.bgTextLines;
+
+  // Top label
+  ctx.fillStyle = color;
+  ctx.font = `400 ${W*0.018}px "Space Grotesk"`;
+  if(variant === 0){
+    ctx.textAlign = 'center';
+    ctx.fillText(labels[0], W/2, H*0.04);
+  } else {
+    ctx.textAlign = 'right';
+    ctx.fillText(labels[0], W*0.94, H*0.04);
+  }
+
+  // Background huge text (matching CSS 14cqw, derived from main title)
+  const bgFontSize = W*0.14;
+  ctx.font = `900 ${bgFontSize}px "Archivo"`;
+  let ly = H*0.14 + bgFontSize*0.8;
+  if(variant === 0){
+    ctx.textAlign = 'left';
+    bgLines.forEach(line => {
+      ctx.fillText(line, W*0.06, ly);
+      ly += bgFontSize*0.95;
+    });
+  } else {
+    ctx.textAlign = 'right';
+    bgLines.forEach(line => {
+      ctx.fillText(line, W*0.94, ly);
+      ly += bgFontSize*0.95;
+    });
+  }
+
+  // Photo cells
+  for(let idx=0; idx<layout.cells.length; idx++){
+    await drawCellImage(ctx, layout, layout.cells[idx], idx, W, H);
+  }
+
+  // Bottom label (from shared label pool)
+  const bottomText = labels[1 % labels.length] || labels[0];
+  ctx.font = `900 ${W*0.06}px "Archivo"`;
+  ctx.fillStyle = color;
+  const bottomTxt = bottomText.startsWith('(') ? bottomText : `(${bottomText})`;
+  if(variant === 0){
+    ctx.textAlign = 'center';
+    ctx.fillText(bottomTxt, W/2, H*0.92);
+  } else {
+    ctx.textAlign = 'right';
+    ctx.fillText(bottomTxt, W*0.94, H*0.92);
+  }
+}
+
+async function exportSplitTitle(ctx, layout, W, H){
+  for(let idx=0; idx<layout.cells.length; idx++){
+    await drawCellImage(ctx, layout, layout.cells[idx], idx, W, H);
+  }
+  const titleText = getTitleText();
+  const parts = titleText.split(/\s+/);
+  const half = Math.ceil(parts.length/2);
+  const romanPart = parts.slice(0, half).join(' ');
+  const italicPart = parts.slice(half).join(' ');
+  const ta = layout.titleAreas[titleAreaIdx] || layout.titleAreas[0];
+
+  ctx.fillStyle = titleColorOverride || '#ffffff';
+  const tx = ta.x*W, ty = ta.y*H, tw = ta.w*W;
+  const romanFs = W*0.09, italicFs = W*0.065;
+  if(ta.align === 'center'){
+    ctx.textAlign = 'center';
+    const drawX = tx + tw/2;
+    ctx.font = `700 ${romanFs}px "Playfair Display"`;
+    ctx.fillText(romanPart, drawX, ty + romanFs);
+    if(italicPart){
+      ctx.font = `italic 500 ${italicFs}px "Playfair Display"`;
+      ctx.fillText(italicPart, drawX, ty + romanFs + italicFs*1.15);
+    }
+  } else {
+    ctx.textAlign = 'left';
+    ctx.font = `700 ${romanFs}px "Playfair Display"`;
+    ctx.fillText(romanPart, tx, ty + romanFs);
+    if(italicPart){
+      ctx.font = `italic 500 ${italicFs}px "Playfair Display"`;
+      ctx.fillText(italicPart, tx + W*0.06, ty + romanFs + italicFs*1.15);
+    }
+  }
+  drawMetaLabels(ctx, layout, W, H);
+}
+
+async function exportBannerText(ctx, layout, W, H){
+  for(let idx=0; idx<layout.cells.length; idx++){
+    await drawCellImage(ctx, layout, layout.cells[idx], idx, W, H);
+  }
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  const bannerY = variant === 1 && layout.bannerYAlt !== undefined ? layout.bannerYAlt : layout.bannerY;
+
+  // band
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fillRect(0, bannerY*H, W, H*0.14);
+
+  const titleWords = getTitleText().toUpperCase().split(/\s+/);
+  const words = titleWords.length >= 4 ? titleWords.slice(0,4) : cycleWords(titleWords, 4);
+
+  ctx.fillStyle = titleColorOverride || '#f4e98a';
+  ctx.font = `700 ${W*0.05}px "Archivo"`;
+  const bandTop = bannerY*H;
+  const bandH = H*0.14;
+  if(words.length >= 4){
+    ctx.textAlign = 'left';  ctx.fillText(words[0], W*0.04, bandTop + bandH*0.42);
+    ctx.textAlign = 'right'; ctx.fillText(words[2] || '', W*0.96, bandTop + bandH*0.42);
+    ctx.textAlign = 'center';
+    ctx.fillText((words[1] || '') + '   ' + (words[3] || ''), W*0.5, bandTop + bandH*0.88);
+  } else {
+    const segW = W*0.92 / Math.max(words.length-1, 1);
+    words.forEach((w, i) => {
+      ctx.textAlign = i === 0 ? 'left' : (i === words.length-1 ? 'right' : 'center');
+      const wx = i === 0 ? W*0.04 : (i === words.length-1 ? W*0.96 : W*0.04 + segW*i);
+      ctx.fillText(w, wx, bandTop + bandH*0.65);
+    });
+  }
+  drawMetaLabels(ctx, layout, W, H);
+}
+
+async function exportWordScatter(ctx, layout, W, H){
+  for(let idx=0; idx<layout.cells.length; idx++){
+    await drawCellImage(ctx, layout, layout.cells[idx], idx, W, H);
+  }
+  const sourceWords = (getTitleText() + ' ' + getParagraphText()).split(/\s+/);
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  const posSet = (variant === 1 && layout.scatterPositionsPerCellAlt) ? layout.scatterPositionsPerCellAlt : layout.scatterPositionsPerCell;
+  const positions = posSet.flat();
+  const words = cycleWords(sourceWords, positions.length);
+  ctx.fillStyle = titleColorOverride || '#ffffff';
+  ctx.font = `400 ${W*0.015}px "Space Grotesk"`;
+  ctx.textAlign = 'left';
+  words.forEach((w, i) => {
+    ctx.fillText(w, positions[i].x*W, positions[i].y*H + W*0.015);
+  });
+}
+
+async function exportJustifiedPara(ctx, layout, W, H){
+  for(let idx=0; idx<layout.cells.length; idx++){
+    await drawCellImage(ctx, layout, layout.cells[idx], idx, W, H);
+  }
+  const paraText = getParagraphText();
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  const paraArea = (variant === 1 && layout.paraAreaAlt) ? layout.paraAreaAlt : layout.paraArea;
+  const fs = W * 0.018;
+  ctx.font = `400 ${fs}px "Space Grotesk"`;
+  ctx.fillStyle = titleColorOverride || '#a8423a';
+  ctx.textAlign = 'left';
+  // Layout justified text by simple word-spacing
+  const words = paraText.split(/\s+/);
+  const boxX = paraArea.x*W;
+  const boxW = paraArea.w*W;
+  const lineH = fs * 1.5;
+  // Build lines greedily
+  const lines = [];
+  let cur = [];
+  let curW = 0;
+  const spaceW = ctx.measureText(' ').width;
+  for(const w of words){
+    const ww = ctx.measureText(w).width;
+    if(curW + ww + (cur.length?spaceW:0) > boxW && cur.length){
+      lines.push(cur);
+      cur = [w]; curW = ww;
+    } else {
+      cur.push(w); curW += ww + (cur.length>1?spaceW:0);
+    }
+  }
+  if(cur.length) lines.push(cur);
+
+  let ly = paraArea.y*H + fs;
+  lines.forEach((lineWords, li) => {
+    if(lineWords.length === 1 || li === lines.length-1){
+      // last line — also justify per the visual
+      const total = lineWords.reduce((s,w)=>s+ctx.measureText(w).width,0);
+      const gap = lineWords.length > 1 ? (boxW - total) / (lineWords.length-1) : 0;
+      let x = boxX;
+      lineWords.forEach(w => { ctx.fillText(w, x, ly); x += ctx.measureText(w).width + gap; });
+    } else {
+      const total = lineWords.reduce((s,w)=>s+ctx.measureText(w).width,0);
+      const gap = (boxW - total) / (lineWords.length-1);
+      let x = boxX;
+      lineWords.forEach(w => { ctx.fillText(w, x, ly); x += ctx.measureText(w).width + gap; });
+    }
+    ly += lineH;
+  });
+}
+
+async function exportTextWrap(ctx, layout, W, H){
+  const color = getCtxTextColor();
+  const wrapText = getParagraphText();
+
+  // Simulate floated photos: layout cells in vertical order, alternating L/R, computing exclusion zones per line
+  const boxX = layout.textBox.x * W;
+  const boxY = layout.textBox.y * H;
+  const boxW = layout.textBox.w * W;
+  const boxH = layout.textBox.h * H;
+  const fs = W * 0.025;
+  const lineH = fs * 1.35;
+  ctx.font = `400 ${fs}px "Cormorant Garamond"`;
+  ctx.fillStyle = color;
+  ctx.textAlign = 'left';
+
+  // Compute each cell's pixel rect — stacking floats vertically based on float side
+  // Approximation: each float occupies its w% × h% (where h is interpreted as fraction of box width for aspect)
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  let leftCursorY = boxY, rightCursorY = boxY;
+  const floats = layout.cells.map((c, idx) => {
+    const fw = c.w * boxW;
+    const fh = (c.h / c.w) * fw; // maintain aspect using w/h ratio
+    const side = variant === 1 ? (c.float === 'left' ? 'right' : 'left') : c.float;
+    let fx, fy;
+    if(side === 'left'){
+      fx = boxX;
+      fy = leftCursorY;
+      leftCursorY = fy + fh + (c.marginBottom || 0.02) * boxH;
+    } else {
+      fx = boxX + boxW - fw;
+      fy = rightCursorY;
+      rightCursorY = fy + fh + (c.marginBottom || 0.02) * boxH;
+    }
+    return {idx, x:fx, y:fy, w:fw, h:fh, side:side};
+  });
+
+  // Draw floats first
+  for(const f of floats){
+    const c = layout.cells[f.idx];
+    await drawCellImage(ctx, layout, {x:f.x/W, y:f.y/H, w:f.w/W, h:f.h/H, shape:'rect'}, f.idx, W, H);
+  }
+
+  // Compute available x-range for each line
+  function availableX(y){
+    let xStart = boxX;
+    let xEnd = boxX + boxW;
+    for(const f of floats){
+      if(y >= f.y && y < f.y + f.h){
+        if(f.side === 'left') xStart = Math.max(xStart, f.x + f.w + boxW*0.02);
+        else xEnd = Math.min(xEnd, f.x - boxW*0.02);
+      }
+    }
+    return {xStart, xEnd, width: xEnd - xStart};
+  }
+
+  // Render text line by line, wrapping based on available width
+  const words = wrapText.split(/\s+/);
+  let wi = 0;
+  let y = boxY + fs;
+  while(wi < words.length && y < boxY + boxH){
+    const {xStart, width} = availableX(y);
+    if(width < fs*2){ y += lineH; continue; }
+    // greedy line build
+    let line = '';
+    while(wi < words.length){
+      const test = line ? line + ' ' + words[wi] : words[wi];
+      if(ctx.measureText(test).width > width && line) break;
+      line = test; wi++;
+    }
+    ctx.fillText(line, xStart, y);
+    y += lineH;
+  }
+}
+
+async function exportFragmentFlow(ctx, layout, W, H){
+  const color = getCtxTextColor();
+  ctx.fillStyle = color;
+  const labels = getLabelLines();
+
+  // top label
+  ctx.font = `400 ${W*0.016}px "Space Grotesk"`;
+  ctx.textAlign = 'left';
+  ctx.fillText(labels[0], W*0.06, H*0.04);
+
+  // Photos
+  for(let idx=0; idx<layout.cells.length; idx++){
+    await drawCellImage(ctx, layout, layout.cells[idx], idx, W, H);
+  }
+
+  // Fragments (derived from main title, cycled to 4 words)
+  const titleWords = getTitleText().split(/\s+/);
+  const baseWords = cycleWords(titleWords, 4);
+  const frags = baseWords.map((w,i,arr)=>{
+    if(i===0) return '(' + w;
+    if(i===arr.length-1) return w + ')';
+    return w;
+  });
+
+  ctx.font = `700 ${W*0.05}px "Archivo"`;
+  ctx.fillStyle = color;
+  const variant = (layout.titleAreas[titleAreaIdx] || {}).variant || 0;
+  const fragPositions = (variant === 1 && layout.fragmentPositionsAlt) ? layout.fragmentPositionsAlt : layout.fragmentPositions;
+  frags.forEach((frag, i) => {
+    const pos = fragPositions[i] || fragPositions[fragPositions.length-1];
+    ctx.fillText(frag, pos.x*W, pos.y*H + W*0.05*0.85);
+  });
+
+  // bottom label
+  ctx.font = `400 ${W*0.016}px "Space Grotesk"`;
+  ctx.fillStyle = color;
+  ctx.fillText(labels[1 % labels.length] || labels[0], W*0.06, H*0.96);
+}
+
+function loadImage(src){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+// Init
+document.getElementById('paragraphInput').value = DEFAULT_PARAGRAPH;
+document.getElementById('labelsInput').value = DEFAULT_LABELS.join('\n');
+document.getElementById('paragraphInput').addEventListener('input', render);
+document.getElementById('labelsInput').addEventListener('input', render);
+initAssignment();
+render();
+</script>
+
+</body>
+</html>
